@@ -16,10 +16,11 @@ import numpy as np
 
 ###################################################################
 # VARIABLES THAT CHANGE:
-wave_file_path = 'short_false_killer_whale_sounds.wav'
+wave_file_path = 'audio/short_false_killer_whale_sounds.wav'
 desired_channel = 3             # Which channel do you want?
 down_sample_tf = True           # Do you want to down sample? 
 down_sample_rate = 10           # How muich down sampling?
+show_images_tf = False 
 
 ###################################################################
 
@@ -46,12 +47,6 @@ time = np.linspace(0, length, data.shape[0])
 
 print(data.shape)
 
-# Plot amplitude vs time
-# plt.plot(time, data, label="Left channel")
-# plt.xlabel("Time [s]")
-# plt.ylabel("Amplitude")
-# plt.show()
-
 # Plot spectrogram 
 f, t, spectro = signal.spectrogram(data, sample_rate)
 spectro_db = 10 * np.log10(spectro + 1e-10)                             # Convert to dB scale, avoid log(0)
@@ -59,10 +54,12 @@ plt.pcolormesh(t, f, spectro_db, shading='gouraud', cmap='magma')       # Try pl
 # plt.pcolormesh(t, f, spectro, shading = 'gouraud')                    # normal
 
 plt.axis("off")
-plt.savefig('test1.jpeg', bbox_inches='tight', pad_inches=0)
+plt.savefig('images/test1.jpeg', bbox_inches='tight', pad_inches=0)
 
-plt.axis('on')
-plt.ylabel('Frequency [Hz]')
-plt.ylim(0,15000)
-plt.xlabel('Time [sec]')
-plt.show()
+# Show images for debugging purposes
+if (show_images_tf):
+    plt.axis('on')
+    plt.ylabel('Frequency [Hz]')
+    plt.ylim(0,15000)
+    plt.xlabel('Time [sec]')
+    plt.show()
