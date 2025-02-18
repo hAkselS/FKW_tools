@@ -16,9 +16,9 @@ import numpy as np
 
 ###################################################################
 # VARIABLES THAT CHANGE:
-wave_file_path = 'audio/short_false_killer_whale_sounds.wav'
+wave_file_path = 'audio_chunks/segment_4.wav'
 desired_channel = 3             # Which channel do you want?
-down_sample_tf = True           # Do you want to down sample? 
+down_sample_tf = False          # Do you want to down sample? 
 down_sample_rate = 10           # How muich down sampling?
 show_images_tf = False
 
@@ -54,7 +54,7 @@ plt.pcolormesh(t, f, spectro_db, shading='gouraud', cmap='magma')       # Try pl
 # plt.pcolormesh(t, f, spectro, shading = 'gouraud')                    # normal
 
 # plt.axis("off")
-plt.savefig('images/test1.jpeg', bbox_inches='tight', pad_inches=0)
+plt.savefig('images/test4.jpeg', bbox_inches='tight', pad_inches=0)
 
 # Show images for debugging purposes
 if (show_images_tf):

@@ -5,7 +5,7 @@ import os
 input_file = "audio/1705_20170912_170426_960.wav"
 output_dir = "audio_chunks"
 selected_channel = 0  # 0 for left, 1 for right
-target_sample_rate = 16000  # Desired downsampling rate
+target_sample_rate = 50000  # Desired downsampling rate (down sample by 10)
 segment_length = 3000  # 3 seconds in milliseconds
 
 # Ensure output directory exists
@@ -20,6 +20,7 @@ if audio.channels > 1:
 
 # Downsample to target sample rate
 audio = audio.set_frame_rate(target_sample_rate)
+# audio = audio[::10] # Second downsampling method 
 
 # Split into 3-second clips and save them
 num_segments = len(audio) // segment_length
