@@ -2,7 +2,7 @@ from pydub import AudioSegment
 import os
 
 # Configuration
-input_file = "audio/Fake whale sounds.wav"
+input_file = "audio/1705_20170912_170426_960.wav"
 output_dir = "audio_chunks"
 selected_channel = 0  # 0 for left, 1 for right
 target_sample_rate = 16000  # Desired downsampling rate

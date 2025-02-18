@@ -20,7 +20,7 @@ wave_file_path = 'audio/short_false_killer_whale_sounds.wav'
 desired_channel = 3             # Which channel do you want?
 down_sample_tf = True           # Do you want to down sample? 
 down_sample_rate = 10           # How muich down sampling?
-show_images_tf = False 
+show_images_tf = False
 
 ###################################################################
 
@@ -53,13 +53,13 @@ spectro_db = 10 * np.log10(spectro + 1e-10)                             # Conver
 plt.pcolormesh(t, f, spectro_db, shading='gouraud', cmap='magma')       # Try plotting in log scale
 # plt.pcolormesh(t, f, spectro, shading = 'gouraud')                    # normal
 
-plt.axis("off")
+# plt.axis("off")
 plt.savefig('images/test1.jpeg', bbox_inches='tight', pad_inches=0)
 
 # Show images for debugging purposes
 if (show_images_tf):
     plt.axis('on')
     plt.ylabel('Frequency [Hz]')
-    plt.ylim(0,15000)
+    # plt.ylim(0,15000)
     plt.xlabel('Time [sec]')
     plt.show()
