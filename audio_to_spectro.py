@@ -50,7 +50,8 @@ for i, file in enumerate(sorted(os.listdir(audio_chunks_dir))):
         hop_size = fft_size // 2  # 50% overlap
         window = get_window("hann", fft_size)
 
-        f, t, Sxx = spectrogram(data, fs=sample_rate, window=window, nperseg=fft_size, noverlap=hop_size, scaling='density')
+        f, t, Sxx = spectrogram(data, fs=sample_rate, window=window, nperseg=fft_size,  scaling='density')
+        # noverlap=hop_size, (removed overlap)
 
         # Convert to dB
         Sxx_db = 10 * np.log10(Sxx + 1e-10)

@@ -45,28 +45,25 @@ for i, file in enumerate(sorted(os.listdir(audio_chunks_dir))):
     filename = os.path.join(audio_chunks_dir, file)
     if os.path.isfile(filename):
         print(f"Processing {filename}")
-        sample_rate, data = wavfile.read(filename)
+        y, sr = librosa.load(filename, sr=desired_sample_rate)
 
-        # Convert to float32 format for librosa
-        data = data.astype(np.float32) / np.max(np.abs(data))
-
-        # Compute STFT using librosa
+        # Compute Mel spectrogram
         n_fft = 1024  # FFT window size
         hop_length = n_fft // 2  # 50% overlap
-        S = librosa.stft(data, n_fft=n_fft, hop_length=hop_length, window="hann")
-
-        # Convert magnitude spectrogram to dB
-        S_db = librosa.amplitude_to_db(np.abs(S), ref=np.max)
+        n_mels = 128  # Number of Mel bands
+        
+        S = librosa.feature.melspectrogram(y=y, sr=sr, n_fft=n_fft, hop_length=hop_length, n_mels=n_mels)
+        S_db = librosa.power_to_db(S, ref=np.max)
 
         # Plot and save spectrogram
         plt.figure(figsize=(8, 6))
-        librosa.display.specshow(S_db, sr=sample_rate, hop_length=hop_length, x_axis="time", y_axis="log", cmap="magma")
+        librosa.display.specshow(S_db, sr=sr, hop_length=hop_length, x_axis="time", y_axis="mel", cmap="magma")
         plt.colorbar(format="%+2.0f dB")
         plt.xlabel("Time (s)")
-        plt.ylabel("Frequency (Hz)")
-        plt.title(f"Spectrogram {i+1}")
+        plt.ylabel("Mel Frequency (Hz)")
+        plt.title(f"Mel Spectrogram {i+1}")
 
-        image_name = os.path.join(output_directory, f"spectro_{i+1}.jpeg")
+        image_name = os.path.join(output_directory, f"mel_spectro_{i+1}.jpeg")
         plt.savefig(image_name, bbox_inches="tight", pad_inches=0, dpi=300)
         plt.close()
         print(f"Saved {image_name}")
