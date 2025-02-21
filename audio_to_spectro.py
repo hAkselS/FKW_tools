@@ -60,12 +60,15 @@ for i, file in enumerate(sorted(os.listdir(audio_chunks_dir))):
         plt.pcolormesh(t, f, Sxx_db, shading='gouraud', cmap='magma')
         plt.xlabel('Time (s)')
         plt.ylabel('Frequency (Hz)')
-        plt.title(f"Spectrogram {i+1}")
+        plt.ylim(0, 100000)
+        #plt.title(f"Spectrogram {i+1}")
+        plt.axis("off")
         
         image_name = os.path.join(output_directory, f"spectro_{i+1}.jpeg")
         plt.savefig(image_name, bbox_inches='tight', pad_inches=0, dpi=300)
         plt.close()
         print(f"Saved {image_name}")
+        os.remove(filename)
 # TODO: delete audio chunks after analyzing!!!!!
 
 # TODO: analyze librosa for speed considerations!
