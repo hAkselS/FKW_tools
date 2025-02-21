@@ -1,10 +1,11 @@
+import librosa
+import librosa.display
 import matplotlib.pyplot as plt
-import os
-from scipy.signal import spectrogram, get_window
-from scipy.io import wavfile
 import numpy as np
-from divide_audio import divide_wav_audio
+import os
 import argparse
+from scipy.io import wavfile
+from divide_audio import divide_wav_audio
 
 ###################################################################
 # VARIABLES THAT CHANGE:
@@ -16,9 +17,10 @@ output_directory = 'images'
 # Accept command line inputs
 parser = argparse.ArgumentParser()
 parser.add_argument("wave_file_path", help="process this file from audio to spectrograms")
-args = parser.parse_args() 
+args = parser.parse_args()
 
-sample_rate, data = wavfile.read(args.wave_file_path)  # Read audio file
+# Read audio file
+sample_rate, data = wavfile.read(args.wave_file_path)  
 
 print(f"\nMetadata for [{args.wave_file_path}]:")
 print(f"sample rate = {sample_rate}")
@@ -45,27 +47,27 @@ for i, file in enumerate(sorted(os.listdir(audio_chunks_dir))):
         print(f"Processing {filename}")
         sample_rate, data = wavfile.read(filename)
 
-        # Compute spectrogram using scipy.signal.spectrogram
-        fft_size = 1024  # Size of FFT window
-        hop_size = fft_size // 2  # 50% overlap
-        window = get_window("hann", fft_size)
+        # Convert to float32 format for librosa
+        data = data.astype(np.float32) / np.max(np.abs(data))
 
-        f, t, Sxx = spectrogram(data, fs=sample_rate, window=window, nperseg=fft_size, noverlap=hop_size, scaling='density')
+        # Compute STFT using librosa
+        n_fft = 1024  # FFT window size
+        hop_length = n_fft // 2  # 50% overlap
+        S = librosa.stft(data, n_fft=n_fft, hop_length=hop_length, window="hann")
 
-        # Convert to dB
-        Sxx_db = 10 * np.log10(Sxx + 1e-10)
+        # Convert magnitude spectrogram to dB
+        S_db = librosa.amplitude_to_db(np.abs(S), ref=np.max)
 
-        # Plot and save
+        # Plot and save spectrogram
         plt.figure(figsize=(8, 6))
-        plt.pcolormesh(t, f, Sxx_db, shading='gouraud', cmap='magma')
-        plt.xlabel('Time (s)')
-        plt.ylabel('Frequency (Hz)')
+        librosa.display.specshow(S_db, sr=sample_rate, hop_length=hop_length, x_axis="time", y_axis="log", cmap="magma")
+        plt.colorbar(format="%+2.0f dB")
+        plt.xlabel("Time (s)")
+        plt.ylabel("Frequency (Hz)")
         plt.title(f"Spectrogram {i+1}")
-        
+
         image_name = os.path.join(output_directory, f"spectro_{i+1}.jpeg")
-        plt.savefig(image_name, bbox_inches='tight', pad_inches=0, dpi=300)
+        plt.savefig(image_name, bbox_inches="tight", pad_inches=0, dpi=300)
         plt.close()
         print(f"Saved {image_name}")
 # TODO: delete audio chunks after analyzing!!!!!
-
-# TODO: analyze librosa for speed considerations!
