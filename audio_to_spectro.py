@@ -1,3 +1,19 @@
+'''
+File:   audio_to_spectro.py
+
+Spec:   Audio to spectro splits audio clips into X second chunks. Chunks are 
+        analyzed and transformed into spectrograms with a normalized size.
+        Spetrogram images are saved to an 'images' directory. Audio chunks are deleted 
+        after use. 
+
+I/O;    This program expects large audio inputs (greater than 3 seconds, up to an hour). 
+        This program outputs spetrograms representing 3 seconds of audio data.
+        Spectrograms do not overlap each other. Audio clips, an intermediary step, are 
+        NOT saved to reduce data clutter.
+
+Usage:  <python3 audio_to_spectro.py path/to/audio.wave>
+'''
+
 import matplotlib.pyplot as plt
 import os
 from scipy.signal import spectrogram, get_window
