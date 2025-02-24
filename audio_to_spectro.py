@@ -11,7 +11,7 @@ I/O;    This program expects large audio inputs (greater than 3 seconds, up to a
         Spectrograms do not overlap each other. Audio clips, an intermediary step, are 
         NOT saved to reduce data clutter.
 
-Usage:  <python3 audio_to_spectro.py path/to/audio.wave>
+Usage:  python3 audio_to_spectro.py <path/to/audio.wave>
 '''
 
 import matplotlib.pyplot as plt
