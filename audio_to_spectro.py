@@ -21,6 +21,9 @@ from scipy.io import wavfile
 import numpy as np
 from divide_audio import divide_wav_audio
 import argparse
+import sys 
+
+
 
 ###################################################################
 # VARIABLES THAT CHANGE:
@@ -34,9 +37,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument("wave_file_path", help="process this file from audio to spectrograms")
 args = parser.parse_args() 
 
+print(f"\nMetadata for [{args.wave_file_path}]:")
+
 sample_rate, data = wavfile.read(args.wave_file_path)  # Read audio file
 
-print(f"\nMetadata for [{args.wave_file_path}]:")
 print(f"sample rate = {sample_rate}")
 
 if len(data.shape) > 1:
@@ -86,6 +90,3 @@ for i, file in enumerate(sorted(os.listdir(audio_chunks_dir))):
         plt.close()
         print(f"Saved {image_name}")
         os.remove(filename)
-# TODO: delete audio chunks after analyzing!!!!!
-
-# TODO: analyze librosa for speed considerations!

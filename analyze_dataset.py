@@ -13,17 +13,27 @@ Usage: python3 analyze_dataset.py <dataset/path> -o <output/directory>
 import os 
 import argparse 
 import csv 
+import subprocess
+import sys 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("input_directory", help="process audio in this directory")
 parser.add_argument("-o", "--output", help="choose a location for image outputs") # output directory 
+parser.add_argument("-c","--count", type=int, default = 1, 
+                    help="count specifies the number of audio files to analyze")
 args = parser.parse_args()
 
-
+audio_to_spectro_path = "audio_to_spectro.py"
 for i, file in enumerate(sorted(os.listdir(args.input_directory))):
     filename = os.path.join(args.input_directory, file)
     if os.path.isfile(filename):
-        print(f"found {filename}")
+        if (i > args.count): 
+            print(f"Max file analysis count [{args.count}] reached, exiting...")
+            sys.exit(0)
+        
+        # Analyze a file 
+        subprocess.run(["python3", audio_to_spectro_path, filename], stdout=sys.stdout, stderr=sys.stderr)
+        # print(f"found {filename}")
 
 
 # Debugging code 
