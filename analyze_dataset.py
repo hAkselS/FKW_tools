@@ -31,12 +31,24 @@ for i, file in enumerate(sorted(os.listdir(args.input_directory))):
             print(f"Max file analysis count [{args.count}] reached, exiting...")
             sys.exit(0)
         
-        # Analyze a file 
+        
+        with open('logs/analyst_logs.csv', mode='a+', newline='') as analyst_logs: 
+            analyst_logs.seek(0) # Move cursor to the start of the existing data
+            reader = csv.reader(analyst_logs)
+
+            # Check to see if file has already been analyzed
+            if any(row == [filename] for row in reader):
+                print(f"Already analyzed [{filename}]")
+                continue 
+            
+            # Add filename if it has not yet been analyzed 
+            else: 
+                writer = csv.writer(analyst_logs)
+                writer.writerow([filename])
+                print(f"Logged [{filename}] as analyzed")
+
+            
+
+        # Analyze the file 
         subprocess.run(["python3", audio_to_spectro_path, filename], stdout=sys.stdout, stderr=sys.stderr)
-        # print(f"found {filename}")
-
-
-# Debugging code 
-print(f"\nIncoming args:")
-print(f"input_directory = [{args.input_directory}]")
-print(f"output directory = [{args.output}]")
+        
