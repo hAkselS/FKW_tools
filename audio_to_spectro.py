@@ -39,7 +39,11 @@ args = parser.parse_args()
 
 print(f"\nMetadata for [{args.wave_file_path}]:")
 
-sample_rate, data = wavfile.read(args.wave_file_path)  # Read audio file
+try:
+    sample_rate, data = wavfile.read(args.wave_file_path)  # Read audio file
+except ValueError:
+    print("Invalid input file type. Supported file type(s): wav")
+    sys.exit(1)
 
 print(f"sample rate = {sample_rate}")
 
