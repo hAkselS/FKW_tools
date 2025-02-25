@@ -38,6 +38,8 @@ parser.add_argument("wave_file_path", help="process this file from audio to spec
 args = parser.parse_args() 
 
 print(f"\nMetadata for [{args.wave_file_path}]:")
+audio_file_name = os.path.basename(args.wave_file_path)[:-4] # Get the name of the audio 
+print(f"Audio name: [{audio_file_name}]")
 
 try:
     sample_rate, data = wavfile.read(args.wave_file_path)  # Read audio file
@@ -89,7 +91,7 @@ for i, file in enumerate(sorted(os.listdir(audio_chunks_dir))):
         #plt.title(f"Spectrogram {i+1}")
         plt.axis("off")
         
-        image_name = os.path.join(output_directory, f"spectro_{i+1}.jpeg")
+        image_name = os.path.join(output_directory, f"{audio_file_name}-{i+1}.jpeg")
         plt.savefig(image_name, bbox_inches='tight', pad_inches=0, dpi=300)
         plt.close()
         print(f"Saved {image_name}")
