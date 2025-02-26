@@ -1,0 +1,6 @@
+.DS_Store
+
+audio/*
+audio_chunks/*
+images/*
+__pycache__
