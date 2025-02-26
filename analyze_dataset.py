@@ -25,7 +25,6 @@ args = parser.parse_args()
 
 audio_to_spectro_path = "audio_to_spectro.py"
 
-.""
 i = 0
 for  file in sorted(os.listdir(args.input_directory)):
     '''
