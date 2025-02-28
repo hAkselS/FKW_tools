@@ -4,3 +4,4 @@ audio/*
 audio_chunks/*
 images/*
 __pycache__
+temporary_image_directory
