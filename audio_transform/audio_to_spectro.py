@@ -1,7 +1,7 @@
 '''
 File:   audio_to_spectro.py
 
-Spec:   Audio to spectro splits audio clips into X second chunks. Chunks are 
+Spec:   Audio to spectro splits audio clips into 3 second chunks. Chunks are 
         analyzed and transformed into spectrograms with a normalized size.
         Spetrogram images are saved to an 'images' directory. Audio chunks are deleted 
         after use. 
@@ -11,13 +11,11 @@ I/O:    This program expects large audio inputs (greater than 3 seconds, up to a
         Spectrograms do not overlap each other. Audio clips, an intermediary step, are 
         NOT saved to reduce data clutter.
 
-        Input: .wav file
-        Output: .jpeg files in <FKW_tools/images>
+        Input: <.wav> file
+        Output: <.jpeg> files in <FKW_tools/images>
 
-Usage:  python3 audio_to_spectro.py <path/to/audio.wave>
-
-Note:   This program adds spectrofied files to analyst_logs/analyst_logs.csv.
-        Hence, remove the file from analyst_logs.csv if you want to analyze it twice. 
+Usage:  python3 audio_to_spectro.py <path/to/audio.wave> -o <output/directory>
+ 
 '''
 
 import matplotlib.pyplot as plt
@@ -44,7 +42,9 @@ parser.add_argument("wave_file_path", help="process this file from audio to spec
 parser.add_argument("-o", "--output", help="choose a location for image outputs") # output directory 
 args = parser.parse_args() 
 
-output_directory = args.output # TODO: this should only happen if args.output != None 
+# if statement here
+if (args.output):
+    output_directory = args.output # TODO: this should only happen if args.output != None 
 
 print(f"\nMetadata for [{args.wave_file_path}]:")
 audio_file_name = os.path.basename(args.wave_file_path)[:-4] # Get the name of the audio 
