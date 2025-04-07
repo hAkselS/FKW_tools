@@ -32,19 +32,23 @@ import sys
 ###################################################################
 # VARIABLES THAT CHANGE:
 desired_channel = 3             # Which channel do you want?
-desired_sample_rate = 500000    # What sample rate do you want? 
+down_sample_ratio = 1           # Divide the sample rate by this number (--sample_rate)
 output_directory = 'images'
 
 ###################################################################
 # Accept command line inputs
 parser = argparse.ArgumentParser()
 parser.add_argument("wave_file_path", help="process this file from audio to spectrograms")
-parser.add_argument("-o", "--output", help="choose a location for image outputs") # output directory 
+parser.add_argument("-o", "--output", help="choose a location for image outputs") # Output directory 
+parser.add_argument("-c", "--channel", help="select an audio channel to transform") #Channel 
+parser.add_argument("-s", "--sample_rate", help="down sample by a factor of <user input>") # TODO: ensure 1 and above
 args = parser.parse_args() 
 
-# if statement here
+# Use arguement values if they exist
 if (args.output):
-    output_directory = args.output # TODO: this should only happen if args.output != None 
+    output_directory = args.output 
+if (args.channel):
+    desired_channel = int(args.channel)
 
 print(f"\nMetadata for [{args.wave_file_path}]:")
 audio_file_name = os.path.basename(args.wave_file_path)[:-4] # Get the name of the audio 
@@ -56,10 +60,22 @@ except ValueError:
     print("Invalid input file type. Supported file type(s): wav")
     sys.exit(1)
 
-print(f"sample rate = {sample_rate}")
+print(f"native sample rate = {sample_rate}")
+desired_sample_rate = sample_rate
 
+# If user wants down sampling, change desired sample rate here
+if (args.sample_rate):
+    down_sample_ratio = int(args.sample_rate)
+    desired_sample_rate = int(desired_sample_rate / down_sample_ratio)
+
+# DEBUG 
+print(f"desired sample rate = {desired_sample_rate}")
+
+
+# Select a channel if multiple 
 if len(data.shape) > 1:
     print(f"number of channels = {data.shape[1]}")
+    print(f"sampling from channel: {desired_channel}")
     data = data[:, desired_channel]  # Select desired channel
 else:
     print(f"number of channels = 1")
