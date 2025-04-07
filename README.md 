@@ -1,0 +1,17 @@
+# False Killer Whale Tools
+A repository dedicated to transforming audio to spectrograms, 
+data preperation, model training, and dataset inference. 
+
+### Each folder has unique functionalities collected
+
+## Audio Transform:
+The audio transform folder contains all things pertaining to
+turning audio into spectrograms.
+
+## Dataset Prediction: 
+The dataset prediction folder contains all things pertaining to
+running inference on existing visual, and eventually audio, datasets.
+
+## Model Training: 
+The model training folder contains all things pertaining to
+training AI models and the data management associated with doing so. 
