@@ -13,19 +13,21 @@ from pydub import AudioSegment
 import os
 import sys 
 
-# Configuration defaults
-# input_file = "audio/1705_20170912_170426_960.wav"
+
+###################################################################
+# CONFIGURATION DEFAULTS
 output_dir = "audio_chunks"
-selected_channel = 0  # 0 for left, 1 for right
-target_sample_rate = -1  # Plave holder, this arg should be passed in
-segment_length = 3000  # 3 seconds in milliseconds 
+selected_channel = 0        # 0 for left, 1 for right
+target_sample_rate = -1     # Placeholder, this arg should be passed in
+segment_length = 3000       # 3 seconds in milliseconds 
+###################################################################
 
 def divide_wav_audio(input_audio, 
                  selected_channel=selected_channel, 
                  target_sample_rate=target_sample_rate, 
                  output_dir=output_dir):
     '''
-    This function receive a string path to a wave file, 
+    This function receives a string path to a wave file, 
     strips all but the desired channel, down samples, then splits 
     the audio into small segments and saves them to an output directory. 
     '''
@@ -50,7 +52,7 @@ def divide_wav_audio(input_audio,
     # Split into 3-second clips and save them
     num_segments = len(audio) // segment_length
     if (num_segments >= 9999):
-        print("Error, audio chunks are only allowed values from 0-999. Undefined behaivor!!!")
+        print("Error, audio chunks are only allowed values from 0-9999. Undefined behaivor!!!")
         sys.exit(1)
 
     for i in range(num_segments):

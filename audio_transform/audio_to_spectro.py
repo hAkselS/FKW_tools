@@ -30,18 +30,18 @@ import sys
 
 
 ###################################################################
-# VARIABLES THAT CHANGE:
-desired_channel = 3             # Which channel do you want?
-down_sample_ratio = 1           # Divide the sample rate by this number (--sample_rate)
+# CONFIGURATION DEFAULTS
 output_directory = 'images'
-
+desired_channel = 3             # Which channel do you want?
+down_sample_ratio = 2           # Divide the sample rate by this number (--sample_rate)
+                                # 2 is the default b/c spectrograms come out cleaner at this rate 
 ###################################################################
 # Accept command line inputs
 parser = argparse.ArgumentParser()
 parser.add_argument("wave_file_path", help="process this file from audio to spectrograms")
 parser.add_argument("-o", "--output", help="choose a location for image outputs") # Output directory 
-parser.add_argument("-c", "--channel", help="select an audio channel to transform") #Channel 
-parser.add_argument("-s", "--sample_rate", help="down sample by a factor of <user input>") # TODO: ensure 1 and above
+parser.add_argument("-ch", "--channel", help="select an audio channel to transform") #Channel 
+parser.add_argument("-ds", "--down_sample", help="down sample by a factor of <user input>") # TODO: ensure 1 and above
 args = parser.parse_args() 
 
 # Use arguement values if they exist
@@ -57,15 +57,15 @@ print(f"Audio name: [{audio_file_name}]")
 try:
     sample_rate, data = wavfile.read(args.wave_file_path)  # Read audio file
 except ValueError:
-    print("Invalid input file type. Supported file type(s): wav")
+    print("Invalid input file type. Supported file type(s): .wav")
     sys.exit(1)
 
 print(f"native sample rate = {sample_rate}")
 desired_sample_rate = sample_rate
 
 # If user wants down sampling, change desired sample rate here
-if (args.sample_rate):
-    down_sample_ratio = int(args.sample_rate)
+if (args.down_sample):
+    down_sample_ratio = float(args.down_sample)
     desired_sample_rate = int(desired_sample_rate / down_sample_ratio)
 
 # DEBUG 
@@ -114,7 +114,7 @@ for i, file in enumerate(sorted(os.listdir(audio_chunks_dir))):
         plt.ylabel('Frequency (Hz)')
         plt.ylim(0, 100000)
         # plt.title(f"Spectrogram {i+1}")
-        plt.axis("off")  
+        #plt.axis("off")  
         
         image_name = os.path.join(output_directory, f"{audio_file_name}-{i+1:04d}.jpeg")
         plt.savefig(image_name, bbox_inches='tight', pad_inches=0, dpi=300)
