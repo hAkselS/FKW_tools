@@ -32,9 +32,9 @@ import sys
 ###################################################################
 # CONFIGURATION DEFAULTS
 output_directory = 'images'
-desired_channel = 3             # Which channel do you want?
+desired_channel = 5             # Which channel do you want? 5 is default b/c it is furthest from the boat
 down_sample_ratio = 2           # Divide the sample rate by this number (--sample_rate)
-                                # 2 is the default b/c spectrograms come out cleaner at this rate 
+                                # 2 is the default b/c spectrograms come out cleaner  
 ###################################################################
 # Accept command line inputs
 parser = argparse.ArgumentParser()
