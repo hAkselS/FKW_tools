@@ -7,7 +7,7 @@ Spec:   This program looks into a directory and analyzes a subset
         what files have been previously analyzed and checks to avoid 
         double analyzing the same file. 
 
-Usage: python3 analyze_dataset.py <dataset/path> -o <output/directory> -c <number of images to analyze> 
+Usage: python3 audio_transform/analyze_dataset.py <dataset/path> -o <output/directory> -c <number of wave files to analyze> 
 '''
 
 import os 
@@ -16,17 +16,24 @@ import csv
 import subprocess
 import sys 
 
+
+###################################################################
+# CONFIGURATION DEFAULTS
+audio_to_spectro_path = "audio_transform/audio_to_spectro.py"       # This program is a wrapped for audio_to_spectro 
+count = 1                                                           # Default number of wave files to analyze
+###################################################################
 parser = argparse.ArgumentParser()
 parser.add_argument("input_directory", help="process audio in this directory")
 parser.add_argument("-o", "--output", help="choose a location for image outputs") # output directory 
 parser.add_argument("-c","--count", type=int, default = 1, 
                     help="count specifies the number of audio files to analyze")
-args = parser.parse_args()
+args = parser.parse_args() # TODO: Allow channel and down sampling as args
 
 if not (args.output):
     parser.error("Please specify output directory")
 
-audio_to_spectro_path = "audio_to_spectro.py"
+if (args.count):
+    count = int(args.count)
 
 i = 0
 for  file in sorted(os.listdir(args.input_directory)):
@@ -39,7 +46,9 @@ for  file in sorted(os.listdir(args.input_directory)):
             print(f"Max file analysis count [{args.count}] reached, exiting...")
             sys.exit(0)
 
-        with open('analyst_logs/analyst_logs.csv', mode='a+', newline='') as analyst_logs: 
+        with open('audio_transform/analyst_logs/analyst_logs.csv', mode='a+', newline='') as analyst_logs: 
+            # TODO: if this file doesn't exisit, the program will fail
+            # TODO: only add once the file has been successfully analyzed 
             analyst_logs.seek(0) # Move cursor to the start of the existing data
             reader = csv.reader(analyst_logs)
 

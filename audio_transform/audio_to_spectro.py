@@ -114,7 +114,7 @@ for i, file in enumerate(sorted(os.listdir(audio_chunks_dir))):
         plt.ylabel('Frequency (Hz)')
         plt.ylim(0, 100000)
         # plt.title(f"Spectrogram {i+1}")
-        #plt.axis("off")  
+        plt.axis("off")  
         
         image_name = os.path.join(output_directory, f"{audio_file_name}-{i+1:04d}.jpeg")
         plt.savefig(image_name, bbox_inches='tight', pad_inches=0, dpi=300)
