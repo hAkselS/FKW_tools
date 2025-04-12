@@ -46,11 +46,11 @@ for  file in sorted(os.listdir(args.input_directory)):
             print(f"Max file analysis count [{args.count}] reached, exiting...")
             sys.exit(0)
 
-        with open('audio_transform/analyst_logs/analyst_logs.csv', mode='a+', newline='') as analyst_logs: 
+        with open('audio_transform/analyst_logs/spectrogram_logs.csv', mode='a+', newline='') as spectrogram_logs: 
             # TODO: if this file doesn't exisit, the program will fail
             # TODO: only add once the file has been successfully analyzed 
-            analyst_logs.seek(0) # Move cursor to the start of the existing data
-            reader = csv.reader(analyst_logs)
+            spectrogram_logs.seek(0) # Move cursor to the start of the existing data
+            reader = csv.reader(spectrogram_logs)
 
             # Check to see if file has already been analyzed
             if any(row == [filename] for row in reader):
@@ -59,7 +59,7 @@ for  file in sorted(os.listdir(args.input_directory)):
             
             # Add filename if it has not yet been analyzed 
             else: 
-                writer = csv.writer(analyst_logs)
+                writer = csv.writer(spectrogram_logs)
                 writer.writerow([filename])
                 print(f"Logged [{filename}] as analyzed")
                 i = i + 1 # Only increment i if you have analyzed a file
