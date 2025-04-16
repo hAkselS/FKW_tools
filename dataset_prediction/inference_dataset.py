@@ -19,8 +19,9 @@ import sys
 
 ###################################################################
 # CONFIGURATION DEFAULTS
-model_path = "models/fkw_whistle_classifier_1.pt"  # Update with your trained model path
-image_count = 1  # Set the number of images to process
+# model_path = "models/fkw_whistle_classifier_1.pt"   # Update with your trained model path
+model_path = 'models/yolo11n.pt'
+image_count = 1                                     # Set the number of images to process
 ###################################################################
 input_dir = ''
 
@@ -30,6 +31,10 @@ parser.add_argument("-o", "--output", help="choose a location for image outputs"
 parser.add_argument("-c", "--count", type=int, default=1, help="choose number of images to analyze")
 
 args = parser.parse_args() 
+if (args.input_directory):
+    input_dir = args.input_directory
+else: 
+    parser.error("Please specify input directory")
 
 if (args.output):
     output_dir = args.output
@@ -38,13 +43,23 @@ else:
     
 if (args.count):
     count = int(args.count)
+else:
+    count = 1 
+
+# DEBUG 
+print(f'Input directory = [{input_dir}]')
+print(f'Output directory = [{output_dir}]')
+print(f'Count = [{count}]')
 
 # Load YOLO model
 model = YOLO(model_path)
 
 # Get list of JPEG images in directory
 image_files = [f for f in os.listdir(input_dir) if f.endswith(".jpeg")]
+print(f'images files: {image_files}\n')
 image_files = image_files[:image_count]  # Select the first X images
+print(f'images files: {image_files}\n')
+
 
 # Iterate through images
 
@@ -54,7 +69,8 @@ for image_file in image_files:
     Run inference on 'count' number of images.
     Save names into a csv, check for doubles. 
     '''
-    image_path = os.path.join(image_count, image_file)
+    image_path = os.path.join(input_dir, image_file) 
+    print(f"Image path = [{image_path}]")
     
     if os.path.isfile(image_path):
         if (i > args.count): 
@@ -65,27 +81,35 @@ for image_file in image_files:
         
             inference_logs.seek(0) # Move cursor to the start of the existing data
             reader = csv.reader(inference_logs)
+            print("here")
         
            
-           # Check to see if file has already been analyzed
-            if any(row == [image_path] for row in reader):
+           # Check to see if file has already been analyzed (path included)
+            if any(row[0] == image_path for row in reader):
                 print(f"Already analyzed [{image_path}]")
                 continue 
             
             # Run YOLO inference
             else:
+                csv_entry = [] 
                 writer = csv.writer(inference_logs)
-                writer.writerow([image_path])
+
+                # Include the image name
+                csv_entry.append(image_path)
+                # writer.writerow([image_path])
                 print(f"Logged [{image_path}] as analyzed")
                 i = i + 1 # Only increment i if you have analyzed a file
-                results = model(image_path, verbose=False)
+                result = model(image_path, verbose=False)
             
                 # Check if there are any detections
-                for result in results:
-                    if len(result.boxes) > 0:  # If at least one detection exists
-                        print(image_file)
-                        # shutil.copy2(image_path, output_dir)  # Use `image_path` instead of `result.path`
-                        break  # No need to check further boxes for this image
+                for result in result:
+                    detection_count = len(result.boxes)
+                    csv_entry.append(detection_count) # TODO: check this 
 
-                            # TODO: add a True into the row associated with the image
+                writer.writerow(csv_entry)
+
+
+    else: 
+        print(f'Image [{image_path}] not found')
+
   
