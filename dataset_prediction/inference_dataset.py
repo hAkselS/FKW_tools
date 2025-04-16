@@ -20,10 +20,11 @@ import sys
 ###################################################################
 # CONFIGURATION DEFAULTS
 # model_path = "models/fkw_whistle_classifier_1.pt"   # Update with your trained model path
-model_path = 'models/yolo11n.pt'
+model_path = 'models/yolo11n.pt' # TODO: replace with actual model
 image_count = 1                                     # Set the number of images to process
 ###################################################################
 input_dir = ''
+# TODO: create condition that prints 'out of files' if all files in directory have been analyzed 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("input_directory", help="process images in this directory")
@@ -38,8 +39,9 @@ else:
 
 if (args.output):
     output_dir = args.output
+    os.makedirs(output_dir, exist_ok=True)
 else:
-    parser.error("Please specify output directory")
+    output_dir = None 
     
 if (args.count):
     count = int(args.count)
@@ -48,7 +50,8 @@ else:
 
 # DEBUG 
 print(f'Input directory = [{input_dir}]')
-print(f'Output directory = [{output_dir}]')
+if (output_dir):
+    print(f'Output directory = [{output_dir}]')
 print(f'Count = [{count}]')
 
 # Load YOLO model
@@ -56,13 +59,8 @@ model = YOLO(model_path)
 
 # Get list of JPEG images in directory
 image_files = [f for f in os.listdir(input_dir) if f.endswith(".jpeg")]
-print(f'images files: {image_files}\n')
-image_files = image_files[:image_count]  # Select the first X images
-print(f'images files: {image_files}\n')
-
 
 # Iterate through images
-
 i = 0
 for image_file in image_files:
     '''
@@ -81,11 +79,9 @@ for image_file in image_files:
         
             inference_logs.seek(0) # Move cursor to the start of the existing data
             reader = csv.reader(inference_logs)
-            print("here")
-        
            
            # Check to see if file has already been analyzed (path included)
-            if any(row[0] == image_path for row in reader):
+            if any(len(row) > 0 and row[0] == image_path for row in reader):
                 print(f"Already analyzed [{image_path}]")
                 continue 
             
@@ -102,13 +98,21 @@ for image_file in image_files:
                 result = model(image_path, verbose=False)
             
                 # Check if there are any detections
+                detection_count = 0 
                 for result in result:
                     detection_count = len(result.boxes)
-                    csv_entry.append(detection_count) # TODO: check this 
+                    csv_entry.append(detection_count) 
 
+               
+                if (detection_count >=1):
+                    if (output_dir):
+                        shutil.copy2(image_path, output_dir)
+                        # Store whether or not the image have been copied to new directory
+                        csv_entry.append('Copied')
+
+                # Store: image path, number detections, if image was copied
                 writer.writerow(csv_entry)
-
-
+   
     else: 
         print(f'Image [{image_path}] not found')
 
