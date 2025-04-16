@@ -38,9 +38,11 @@ if (args.count):
 i = 0
 for  file in sorted(os.listdir(args.input_directory)):
     '''
-    Analyze 'count' number of files in a given directory
+    Tranform 'count' number of files in a given directory into spectrograms. 
+    Save names into a csv, check csv for doubles. 
     '''
     filename = os.path.join(args.input_directory, file)
+
     if os.path.isfile(filename):
         if (i > args.count): 
             print(f"Max file analysis count [{args.count}] reached, exiting...")
@@ -63,7 +65,8 @@ for  file in sorted(os.listdir(args.input_directory)):
                 writer.writerow([filename])
                 print(f"Logged [{filename}] as analyzed")
                 i = i + 1 # Only increment i if you have analyzed a file
+                # TODO: print analyzing x/count
 
-        # Analyze the file 
-        subprocess.run(["python3", audio_to_spectro_path, filename, '-o', args.output], stdout=sys.stdout, stderr=sys.stderr)
+                # Analyze the file 
+                subprocess.run(["python3", audio_to_spectro_path, filename, '-o', args.output], stdout=sys.stdout, stderr=sys.stderr)
         
