@@ -19,8 +19,8 @@ import sys
 
 ###################################################################
 # CONFIGURATION DEFAULTS
-# model_path = "models/fkw_whistle_classifier_1.pt"   # Update with your trained model path
-model_path = 'models/yolo11n.pt' # TODO: replace with actual model
+model_path = "models/fkw_whistle_classifier_1.pt"   # Update with your trained model path
+# model_path = 'models/yolo11n.pt' # For debugging 
 image_count = 1                                     # Set the number of images to process
 ###################################################################
 input_dir = ''
@@ -95,7 +95,7 @@ for image_file in image_files:
                 # writer.writerow([image_path])
                 print(f"Logged [{image_path}] as analyzed")
                 i = i + 1 # Only increment i if you have analyzed a file
-                result = model(image_path, verbose=False)
+                result = model(image_path, verbose=False, save_txt=True)
             
                 # Check if there are any detections
                 detection_count = 0 
