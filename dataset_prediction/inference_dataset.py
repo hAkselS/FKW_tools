@@ -30,8 +30,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument("input_directory", help="process images in this directory")
 parser.add_argument("-o", "--output", help="choose a location for image outputs")
 parser.add_argument("-c", "--count", type=int, default=1, help="choose number of images to analyze")
+parser.add_argument("--no_log", help="do not log image files to analyst logs or check existing logs.")
 
+analyst_logging = True # Default to true 
 args = parser.parse_args() 
+
 if (args.input_directory):
     input_dir = args.input_directory
 else: 
@@ -47,6 +50,12 @@ if (args.count):
     count = int(args.count)
 else:
     count = 1 
+
+if (args.no_log):
+    '''If no log is inacted, do not check logs and do not add to logs'''
+    analyst_logging = False
+    print("No logs, ignoring existing logs, not writing to new logs")
+
 
 # DEBUG 
 print(f'Input directory = [{input_dir}]')
@@ -82,8 +91,9 @@ for image_file in image_files:
            
            # Check to see if file has already been analyzed (path included)
             if any(len(row) > 0 and row[0] == image_path for row in reader):
-                print(f"Already analyzed [{image_path}]")
-                continue 
+                if (analyst_logging == True)
+                    print(f"Already analyzed [{image_path}]")
+                    continue 
             
             # Run YOLO inference
             else:
@@ -111,8 +121,9 @@ for image_file in image_files:
                         csv_entry.append('Copied')
 
                 # Store: image path, number detections, if image was copied
-                writer.writerow(csv_entry)
-   
+                if analyst_logging == True: 
+                    writer.writerow(csv_entry)
+    
     else: 
         print(f'Image [{image_path}] not found')
 
