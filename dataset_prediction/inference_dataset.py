@@ -30,7 +30,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("input_directory", help="process images in this directory")
 parser.add_argument("-o", "--output", help="choose a location for image outputs")
 parser.add_argument("-c", "--count", type=int, default=1, help="choose number of images to analyze")
-parser.add_argument("--no_log", help="do not log image files to analyst logs or check existing logs.")
+parser.add_argument("--no_logs", action="store_true", help="do not log image files to analyst logs or check existing logs.")
 
 analyst_logging = True # Default to true 
 args = parser.parse_args() 
@@ -51,7 +51,7 @@ if (args.count):
 else:
     count = 1 
 
-if (args.no_log):
+if (args.no_logs):
     '''If no log is inacted, do not check logs and do not add to logs'''
     analyst_logging = False
     print("No logs, ignoring existing logs, not writing to new logs")
@@ -91,7 +91,7 @@ for image_file in image_files:
            
            # Check to see if file has already been analyzed (path included)
             if any(len(row) > 0 and row[0] == image_path for row in reader):
-                if (analyst_logging == True)
+                if analyst_logging == True:
                     print(f"Already analyzed [{image_path}]")
                     continue 
             
@@ -102,8 +102,10 @@ for image_file in image_files:
 
                 # Include the image name
                 csv_entry.append(image_path)
-                # writer.writerow([image_path])
-                print(f"Logged [{image_path}] as analyzed")
+                
+                if analyst_logging == True:
+                    # Only print logged ___ if logging enabled
+                    print(f"Logged [{image_path}] as analyzed")
                 i = i + 1 # Only increment i if you have analyzed a file
                 result = model(image_path, verbose=False, save_txt=True)
             
