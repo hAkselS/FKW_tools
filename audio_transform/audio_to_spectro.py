@@ -104,6 +104,17 @@ for i, file in enumerate(sorted(os.listdir(audio_chunks_dir))):
         f, t, Sxx = spectrogram(data, fs=sample_rate, window=window, nperseg=fft_size,  scaling='density')
         # noverlap=hop_size, (removed overlap)
 
+
+        # TEST: Remove all but the 4k-9k Hz range 
+        # range is wrong, plus it adds white space. but its a start. 
+        # fmin = 4000 # Hz
+        # fmax = 9000 # Hz
+        # freq_slice = np.where((f >= fmin) & (f <= fmax))
+
+        # # keep only frequencies of interest
+        # f   = f[freq_slice]
+        # Sxx = Sxx[freq_slice,:][0]   
+             
         # Convert to dB
         Sxx_db = 10 * np.log10(Sxx + 1e-10)
 
@@ -112,7 +123,7 @@ for i, file in enumerate(sorted(os.listdir(audio_chunks_dir))):
         plt.pcolormesh(t, f, Sxx_db, shading='gouraud', cmap='magma')
         plt.xlabel('Time (s)')
         plt.ylabel('Frequency (Hz)')
-        plt.ylim(0, 100000)
+        plt.ylim(0, 100000) # TODO: Normalized plots here
         # plt.title(f"Spectrogram {i+1}")
         plt.axis("off")  
         
