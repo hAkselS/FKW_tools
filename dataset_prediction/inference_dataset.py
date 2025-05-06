@@ -67,7 +67,7 @@ print(f'Count = [{count}]')
 model = YOLO(model_path)
 
 # Get list of JPEG images in directory
-image_files = [f for f in os.listdir(input_dir) if f.endswith(".jpeg")]
+image_files = [f for f in os.listdir(input_dir) if f.endswith(".jpg")]
 
 # Iterate through images
 i = 0
