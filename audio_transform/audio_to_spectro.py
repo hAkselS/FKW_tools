@@ -14,7 +14,7 @@ I/O:    This program expects large audio inputs (greater than 3 seconds, up to a
         Input: <.wav> file
         Output: <.jpeg> files in <FKW_tools/images>
 
-Usage:  python3 audio_to_spectro.py <path/to/audio.wave> -o <output/directory>
+Usage:  python3 audio_transform/audio_to_spectro.py <path/to/audio.wave> -o <output/directory>
  
 '''
 
@@ -116,7 +116,7 @@ for i, file in enumerate(sorted(os.listdir(audio_chunks_dir))):
 
         # Plot and save
         plt.figure(figsize=(8, 0.3)) # was 8, 6
-        plt.pcolormesh(t, f, Sxx_db, shading='gouraud', cmap='magma')
+        plt.pcolormesh(t, f, Sxx_db, shading='gouraud', cmap=plt.cm.binary) # was cmap='magma'
         plt.xlabel('Time (s)')
         plt.ylabel('Frequency (Hz)')
         plt.ylim(4000, 9000) # TODO: Normalized plots here
