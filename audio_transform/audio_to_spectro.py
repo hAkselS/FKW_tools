@@ -139,7 +139,7 @@ for chunk_start in range(0, len(files), chunk_size):
         ax.axis('off')
         # ax.text(0.5, -0.15, file.replace('.wav', ''), va='top', ha='center',
         #     fontsize=6, color='white', transform=ax.transAxes)
-        ax.text(0, -0.3, file.replace('.wav', ''), va='bottom', ha='left', fontsize=6, transform=ax.transAxes, color='red')
+        #ax.text(0, -0.3, file.replace('.wav', ''), va='bottom', ha='left', fontsize=6, transform=ax.transAxes, color='red')
 
         # Optional: delete original audio
         os.remove(filename)
