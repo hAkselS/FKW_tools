@@ -12,7 +12,12 @@ I/O:    This program expects large audio inputs (greater than 3 seconds, up to a
         NOT saved to reduce data clutter.
 
         Input: <.wav> file
-        Output: <.jpeg> files in <FKW_tools/images>
+        Output: <.jpg> files in <FKW_tools/images>
+
+Images: Images are a collection of 10 spectrograms, each spectrogram is 3 seconds of
+        audio data. In total, each image represents 30 seconds of data. The top spectrogram 
+        is the name of the image, and the spectrograms below each represent the next 3 seconds. 
+        Thus the top spectrogram is seconds 0-3 and the bottom is seconds 27-30. 
 
 Usage:  python3 audio_transform/audio_to_spectro.py <path/to/audio.wave> -o <output/directory>
  
@@ -85,6 +90,7 @@ print(f"length (seconds) = {length}")
 
 # Divide audio into digestible segments
 print(f"\nDividing and downsampling audio:")
+# TODO: optimize so that this step no longer exists
 audio_chunks_dir = divide_wav_audio(args.wave_file_path, desired_channel, desired_sample_rate, 'audio_chunks')
 
 # Create output directory 
@@ -137,11 +143,10 @@ for chunk_start in range(0, len(files), chunk_size):
         pcm = ax.pcolormesh(t, f, Sxx_db, shading='gouraud', cmap=plt.cm.binary)
         ax.set_ylim(4000, 9000)
         ax.axis('off')
-        # ax.text(0.5, -0.15, file.replace('.wav', ''), va='top', ha='center',
-        #     fontsize=6, color='white', transform=ax.transAxes)
+        # Optinal: induvidual spectrogram labels
         #ax.text(0, -0.3, file.replace('.wav', ''), va='bottom', ha='left', fontsize=6, transform=ax.transAxes, color='red')
 
-        # Optional: delete original audio
+        # Delete audio chunks
         os.remove(filename)
 
     # Save with the base name of the first spectrogram
@@ -151,50 +156,4 @@ for chunk_start in range(0, len(files), chunk_size):
     plt.close()
     print(f"Saved {image_name}") 
 
-# for i, file in enumerate(sorted(os.listdir(audio_chunks_dir))):
-#     filename = os.path.join(audio_chunks_dir, file)
-#     if os.path.isfile(filename):
-#         print(f"Processing {filename}")
-#         sample_rate, data = wavfile.read(filename)
-
-#         # Compute spectrogram using scipy.signal.spectrogram
-#         fft_size = 1024  # Size of FFT window
-#         hop_size = fft_size // 2  # 50% overlap
-#         window = get_window("hann", fft_size)
-
-#         f, t, Sxx = spectrogram(data, fs=sample_rate, window=window, nperseg=fft_size,  scaling='density')
-
-#         # Remove all but the 4k-9k Hz range  
-#         fmin = 3500 # Hz
-#         fmax = 9500 # Hz
-#         freq_slice = np.where((f >= fmin) & (f <= fmax))
-#         f   = f[freq_slice]
-#         Sxx = Sxx[freq_slice,:][0]   
-             
-#         # Convert to dB
-#         Sxx_db = 10 * np.log10(Sxx + 1e-10)
-
-
-#         # Plot
-#         fig, axes = plt.subplots(nrows=10, ncols=1, figsize=(8, 5),  # 10 x 0.3 + small gaps ~ 2 units
-#                          constrained_layout=True)
-
-#         for i, ax in enumerate(axes):
-#             pcm = ax.pcolormesh(t, f, Sxx_db, shading='gouraud', cmap=plt.cm.binary)
-#             ax.set_ylim(4000, 9000)
-#             ax.axis('off')
-
-#             # Caption: Adjust or customize as needed
-#             ax.text(-0.01, 0.5, f"Spectrogram {i+1}", va='center', ha='right', fontsize=8, transform=ax.transAxes)
-
-
-#         # Save and remove audio 
-#         image_name = os.path.join(output_directory, f"{audio_file_name}-{i+1:04d}.jpg")
-#         plt.savefig(image_name, bbox_inches='tight', pad_inches=0, dpi=300)
-#         plt.close()
-#         print(f"Saved {image_name}")
-#         os.remove(filename)
-
-# print(f"Finished processing {audio_file_name}!")
-
-# sys.exit(0) # Exit happily
+sys.exit(0) # Exit happily 
