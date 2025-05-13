@@ -81,12 +81,61 @@ samples_per_chunk = int(desired_sample_rate * chunk_duration)
 num_chunks = int(len(data) / samples_per_chunk)
 print(f"num chunks = {num_chunks}")
 
+all_chunks = [] 
 for i in range(num_chunks):
     start_sample = i * samples_per_chunk
     end_sample = start_sample + samples_per_chunk
     chunk_data = data[ start_sample : end_sample ]
+    all_chunks.append(chunk_data)
 
 ## Create Spectrograms
+def make_spectro(num_rows=10, which_plot=0): 
+    fig, axes = plt.subplots(
+        nrows=num_rows, 
+        ncols=1, figsize=(8, 5),
+        facecolor='black',
+        gridspec_kw={'hspace': -0.5},
+        constrained_layout=True)
+    
+    fig.patch.set_facecolor('black')
+
+
+    for i in range(num_rows):
+        # Compute spectrogram
+        fft_size = 1024
+        hop_size = fft_size // 2
+        window = get_window("hann", fft_size)
+
+                                            # 10 spectros to a plot, if 2nd  spectro grab 10 - 19
+        f, t, Sxx = spectrogram(all_chunks[i + which_plot*10], fs=sample_rate, window=window, nperseg=fft_size, scaling='density')
+
+        fmin, fmax = 3500, 9500
+        freq_slice = np.where((f >= fmin) & (f <= fmax))
+        f = f[freq_slice]
+        Sxx = Sxx[freq_slice, :][0]
+
+        Sxx_db = 10 * np.log10(Sxx + 1e-10)
+
+        # Plot
+        ax = axes[i]
+        #ax.set_facecolor('black')  # Set each subplot background to black
+        pcm = ax.pcolormesh(t, f, Sxx_db, shading='gouraud', cmap=plt.cm.binary)
+        ax.set_ylim(4000, 9000)
+        ax.axis('off')
+
+    #base_name = os.path.splitext(chunk[0])[0]
+    base_name='please work'
+    image_name = os.path.join(output_directory, f"{base_name}.jpg")
+    plt.savefig(image_name, bbox_inches='tight', pad_inches=0, dpi=300)
+    plt.close()
+    print(f"Saved {image_name}") 
+
+
+# Make two spectrograms with 
+make_spectro(10, 0)
+make_spectro(10, 1)
+
+
 
 
 
