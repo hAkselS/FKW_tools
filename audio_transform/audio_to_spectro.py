@@ -32,8 +32,6 @@ from divide_audio import divide_wav_audio
 import argparse
 import sys 
 
-
-
 ###################################################################
 # CONFIGURATION DEFAULTS
 output_directory = 'images'
