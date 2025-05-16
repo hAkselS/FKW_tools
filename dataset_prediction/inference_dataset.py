@@ -19,7 +19,7 @@ import sys
 
 ###################################################################
 # CONFIGURATION DEFAULTS
-model_path = "models/fkw_whistle_classifier_1.pt"   # Update with your trained model path
+model_path = "models/fkw_whistle_classifier_2.pt"   # Update with your trained model path
 # model_path = 'models/yolo11n.pt' # For debugging 
 image_count = 1                                     # Set the number of images to process
 ###################################################################
