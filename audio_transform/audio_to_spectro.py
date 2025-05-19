@@ -1,25 +1,18 @@
 '''
 File:   audio_to_spectro.py
 
-Spec:   Audio to spectro splits audio clips into 3 second chunks. Chunks are 
-        analyzed and transformed into spectrograms with a normalized size.
-        Spetrogram images are saved to an 'images' directory. Audio chunks are deleted 
-        after use. 
+Spec:   Audio to spectro produces two images per one minute of ingested audio. 
+        Each image contains ten, three second spectrogram strips separated by a small 
+        black space. Images are roughly square for optimal performance with YOLO. 
+        Images are not saved in gray scale for YOLO training purposes. 
 
-I/O:    This program expects large audio inputs (greater than 3 seconds, up to an hour). 
-        This program outputs spetrograms representing 3 seconds of audio data.
-        Spectrograms do not overlap each other. Audio clips, an intermediary step, are 
-        NOT saved to reduce data clutter.
-
-        Input: <.wav> file
-        Output: <.jpg> files in <FKW_tools/images>
-
-Images: Images are a collection of 10 spectrograms, each spectrogram is 3 seconds of
-        audio data. In total, each image represents 30 seconds of data. The top spectrogram 
-        is the name of the image, and the spectrograms below each represent the next 3 seconds. 
-        Thus the top spectrogram is seconds 0-3 and the bottom is seconds 27-30. 
+I/O:    This program expects one minute audio inputs. 
+        This program outputs spetrograms images containing ten spectrogram strips.
+        Spectrograms do not overlap each other.
 
 Usage:  python3 audio_transform/audio_to_spectro.py <path/to/audio.wave> -o <output/directory>
+
+Optioanal Args: -ch allows for channel selections, -ds allows for down sampling 
  
 '''
 
@@ -32,12 +25,19 @@ from divide_audio import divide_wav_audio
 import argparse
 import sys 
 
+
+
 ###################################################################
 # CONFIGURATION DEFAULTS
 output_directory = 'images'
 desired_channel = 5             # Which channel do you want? 5 is default b/c it is furthest from the boat
-down_sample_ratio = 2           # Divide the sample rate by this number (--sample_rate)
+down_sample_ratio = 1           # Divide the sample rate by this number (--sample_rate)
                                 # 2 is the default b/c spectrograms come out cleaner  
+chunk_duration = 3              # Number of seconds represented in each pane of the spectrogram
+freq_min = 3500                 # Spectrogram strip's minimum sampled frequency 
+freq_max = 9500                 # Spectrogram strip's maximum sampled frequency 
+plot_min = 4000                 # Spectrogram strip's minumum DISPLAYED frequency
+plot_max = 9000                 # Spectrogram strip's maximum DISPLAYED frequency
 ###################################################################
 # Accept command line inputs
 parser = argparse.ArgumentParser()
@@ -54,19 +54,19 @@ if (args.channel):
     desired_channel = int(args.channel)
 
 print(f"\nMetadata for [{args.wave_file_path}]:")
-audio_file_name = os.path.basename(args.wave_file_path)[:-4] # Get the name of the audio 
+audio_file_name = os.path.basename(args.wave_file_path)[:-4]    # Get the name of the audio 
 print(f"Audio name: [{audio_file_name}]")
 
 try:
-    sample_rate, data = wavfile.read(args.wave_file_path)  # Read audio file
+    sample_rate, data = wavfile.read(args.wave_file_path)       # Read audio file
 except ValueError:
     print("Invalid input file type. Supported file type(s): .wav")
     sys.exit(1)
 
 print(f"native sample rate = {sample_rate}")
-desired_sample_rate = sample_rate
+desired_sample_rate = sample_rate / down_sample_ratio
 
-# If user wants down sampling, change desired sample rate here
+# If user wants down sampling, change desired sample rate here TODO: does nothing yet
 if (args.down_sample):
     down_sample_ratio = float(args.down_sample)
     desired_sample_rate = int(desired_sample_rate / down_sample_ratio)
@@ -84,51 +84,45 @@ else:
     print(f"number of channels = 1")
 
 length = data.shape[0] / sample_rate
+if not (58 < length < 62): # Make sure length is 60 seconds for now! 
+    print(f"Length not ~60 second, undefined behavior... exiting")
+    sys.exit(0)
 print(f"length (seconds) = {length}")
 
-# Divide audio into digestible segments
-print(f"\nDividing and downsampling audio:")
-# TODO: optimize so that this step no longer exists
-audio_chunks_dir = divide_wav_audio(args.wave_file_path, desired_channel, desired_sample_rate, 'audio_chunks')
+# Determine the number of whole 3 second chunks
+samples_per_chunk = int(desired_sample_rate * chunk_duration)
+num_chunks = int(len(data) / samples_per_chunk)
+print(f"num chunks = {num_chunks}")
 
-# Create output directory 
-print("\nGenerating spectrograms")
-os.makedirs(output_directory, exist_ok=True)  # Ensure output directory exists
+all_chunks = [] 
+for i in range(num_chunks):
+    start_sample = i * samples_per_chunk
+    end_sample = start_sample + samples_per_chunk
+    chunk_data = data[ start_sample : end_sample ]
+    all_chunks.append(chunk_data)
 
 ## Create Spectrograms
-# Identify files 
-files = sorted([f for f in os.listdir(audio_chunks_dir) if os.path.isfile(os.path.join(audio_chunks_dir, f))])
-chunk_size = 10
-
-# Process in chunks of 10
-for chunk_start in range(0, len(files), chunk_size):
-    chunk = files[chunk_start:chunk_start + chunk_size]
-    if len(chunk) < chunk_size: # TODO: skips if there are < 10 audio files to work with
-        break  # Skip incomplete chunks
-
+def make_spectro(num_rows=10, which_plot=0): 
     fig, axes = plt.subplots(
-        nrows=chunk_size, 
+        nrows=num_rows, 
         ncols=1, figsize=(8, 5),
         facecolor='black',
         gridspec_kw={'hspace': -0.5},
         constrained_layout=True)
     
-    #fig.patch.set_facecolor('black')
+    fig.patch.set_facecolor('black')
 
-    for i, file in enumerate(chunk):
-        filename = os.path.join(audio_chunks_dir, file)
-        print(f"Processing {filename}")
-        sample_rate, data = wavfile.read(filename)
 
+    for i in range(num_rows):
         # Compute spectrogram
         fft_size = 1024
         hop_size = fft_size // 2
         window = get_window("hann", fft_size)
 
-        f, t, Sxx = spectrogram(data, fs=sample_rate, window=window, nperseg=fft_size, scaling='density')
+                                            # 10 spectros to a plot, if 2nd  spectro grab 10 - 19
+        f, t, Sxx = spectrogram(all_chunks[i + which_plot*10], fs=sample_rate, window=window, nperseg=fft_size, scaling='density')
 
-        # Focus frequency range
-        fmin, fmax = 3500, 9500
+        fmin, fmax = freq_min, freq_max
         freq_slice = np.where((f >= fmin) & (f <= fmax))
         f = f[freq_slice]
         Sxx = Sxx[freq_slice, :][0]
@@ -139,19 +133,16 @@ for chunk_start in range(0, len(files), chunk_size):
         ax = axes[i]
         #ax.set_facecolor('black')  # Set each subplot background to black
         pcm = ax.pcolormesh(t, f, Sxx_db, shading='gouraud', cmap=plt.cm.binary)
-        ax.set_ylim(4000, 9000)
+        ax.set_ylim(plot_min, plot_max)
         ax.axis('off')
-        # Optinal: induvidual spectrogram labels
-        #ax.text(0, -0.3, file.replace('.wav', ''), va='bottom', ha='left', fontsize=6, transform=ax.transAxes, color='red')
 
-        # Delete audio chunks
-        os.remove(filename)
 
-    # Save with the base name of the first spectrogram
-    base_name = os.path.splitext(chunk[0])[0]
+    base_name=audio_file_name + '-' + str("{:04}".format(which_plot*10 + 1)) 
     image_name = os.path.join(output_directory, f"{base_name}.jpg")
     plt.savefig(image_name, bbox_inches='tight', pad_inches=0, dpi=300)
     plt.close()
     print(f"Saved {image_name}") 
 
-sys.exit(0) # Exit happily 
+# Make two spectrograms with the input data # TODO: generalize to any # of spectrograms
+make_spectro(10, 0)
+make_spectro(10, 1)
