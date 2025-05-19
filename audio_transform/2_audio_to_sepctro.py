@@ -1,12 +1,18 @@
 '''
-File:   2_audio_to_spectro.py
+File:   audio_to_spectro.py
 
-Spec:   A speed optimized version of audio to spectro. This version does not
-        divide audio into 3 second chunks, rather it saves each 3 second in RAM 
-        and processes in each or just processes the whole thing into out desired 
-        spectrogram shape. 
+Spec:   Audio to spectro produces two images per one minute of ingested audio. 
+        Each image contains ten, three second spectrogram strips separated by a small 
+        black space. Images are roughly square for optimal performance with YOLO. 
+        Images are not saved in gray scale for YOLO training purposes. 
+
+I/O:    This program expects one minute audio inputs. 
+        This program outputs spetrograms images containing ten spectrogram strips.
+        Spectrograms do not overlap each other.
 
 Usage:  python3 audio_transform/audio_to_spectro.py <path/to/audio.wave> -o <output/directory>
+
+Optioanal Args: -ch allows for channel selections, -ds allows for down sampling 
  
 '''
 
