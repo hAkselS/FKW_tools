@@ -1,9 +1,7 @@
 '''
-File:   2_audio_to_spectro.py
+File:   audio_to_spectro.py
 
-Spec:   Try to only graph data above a certain power level. 
-
-
+Spec:   Try to eliminate all noise beyond a threshold 
 
 Usage:  python3 audio_transform/audio_to_spectro.py <path/to/audio.wave> -o <output/directory>
 
@@ -111,6 +109,7 @@ def make_spectro(num_rows=10, which_plot=0):
     for i in range(num_rows):
         # Compute spectrogram
         fft_size = 1024
+        hop_size = fft_size // 2
         window = get_window("hann", fft_size)
 
                                             # 10 spectros to a plot, if 2nd  spectro grab 10 - 19
@@ -122,24 +121,19 @@ def make_spectro(num_rows=10, which_plot=0):
         Sxx = Sxx[freq_slice, :][0]
 
         Sxx_db = 10 * np.log10(Sxx + 1e-10)
-        print(type(Sxx_db))
-        print(Sxx_db.shape)
+        threshold = 1.0 
+        Sxx_db[Sxx_db < threshold] = 10 
 
         # Plot
         ax = axes[i]
         #ax.set_facecolor('black')  # Set each subplot background to black
-        ax.pcolormesh(t, f, Sxx_db, shading='gouraud', cmap=plt.cm.binary)
+        pcm = ax.pcolormesh(t, f, Sxx_db, shading='gouraud', cmap=plt.cm.binary)
         ax.set_ylim(plot_min, plot_max)
-        # ax.axis('off') # was off 
-        ax.axis('on')
-
-
-
+        ax.axis('off')
 
 
     base_name=audio_file_name + '-' + str("{:04}".format(which_plot*10 + 1)) 
     image_name = os.path.join(output_directory, f"{base_name}.jpg")
-
     plt.savefig(image_name, bbox_inches='tight', pad_inches=0, dpi=300)
     plt.close()
     print(f"Saved {image_name}") 
@@ -147,11 +141,3 @@ def make_spectro(num_rows=10, which_plot=0):
 # Make two spectrograms with the input data # TODO: generalize to any # of spectrograms
 make_spectro(10, 0)
 make_spectro(10, 1)
-
-'''
-Goal: 
--figure out sxx db 
--replace all points below a threshold with 0
--only see visible whale noises, but no outside noise 
-
-'''
