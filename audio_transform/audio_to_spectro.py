@@ -9,6 +9,7 @@ Spec:   Audio to spectro produces two images per one minute of ingested audio.
 I/O:    This program expects one minute audio inputs. 
         This program outputs spetrograms images containing ten spectrogram strips.
         Spectrograms do not overlap each other.
+        This program currently can ONLY ingest 1 minute audio inputs. 
 
 Usage:  python3 audio_transform/audio_to_spectro.py <path/to/audio.wave> -o <output/directory>
 
@@ -21,7 +22,6 @@ import os
 from scipy.signal import spectrogram, get_window
 from scipy.io import wavfile
 import numpy as np
-from divide_audio import divide_wav_audio
 import argparse
 import sys 
 
