@@ -1,10 +1,7 @@
 '''
 File:   audio_to_spectro.py
 
-Spec:   Audio to spectro produces two images per one minute of ingested audio. 
-        Each image contains ten, three second spectrogram strips separated by a small 
-        black space. Images are roughly square for optimal performance with YOLO. 
-        Images are not saved in gray scale for YOLO training purposes. 
+Spec:   Try eliminating noise by requiring a minumum threshold to plot data. 
 
 I/O:    This program expects one minute audio inputs. 
         This program outputs spetrograms images containing ten spectrogram strips.
@@ -114,6 +111,8 @@ def make_spectro(num_rows=10, which_plot=0):
         Sxx = Sxx[freq_slice, :][0]
 
         Sxx_db = 10 * np.log10(Sxx + 1e-10)
+        threshold = 1.0 
+        Sxx_db[Sxx_db < threshold] = 10 
 
         # Plot
         ax = axes[i]
