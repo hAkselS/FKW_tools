@@ -10,8 +10,7 @@ I/O:    This program expects one minute audio inputs.
 
 Usage:  python3 audio_transform/audio_to_spectro.py <path/to/audio.wave> -o <output/directory>
 
-Optioanal Args: -ch allows for channel selections, -ds allows for down sampling 
- 
+Optioanal Args: -ch allows for channel selections
 '''
 
 import matplotlib.pyplot as plt
