@@ -1,7 +1,12 @@
 '''
 File:   audio_to_spectro.py
 
-Spec:   Try to eliminate all noise beyond a threshold 
+Spec:   Try eliminating noise by requiring a minumum threshold to plot data. 
+
+I/O:    This program expects one minute audio inputs. 
+        This program outputs spetrograms images containing ten spectrogram strips.
+        Spectrograms do not overlap each other.
+        This program currently can ONLY ingest 1 minute audio inputs. 
 
 Usage:  python3 audio_transform/audio_to_spectro.py <path/to/audio.wave> -o <output/directory>
 
@@ -23,8 +28,6 @@ import sys
 # CONFIGURATION DEFAULTS
 output_directory = 'images'
 desired_channel = 5             # Which channel do you want? 5 is default b/c it is furthest from the boat
-down_sample_ratio = 1           # Divide the sample rate by this number (--sample_rate)
-                                # 2 is the default b/c spectrograms come out cleaner  
 chunk_duration = 3              # Number of seconds represented in each pane of the spectrogram
 freq_min = 3500                 # Spectrogram strip's minimum sampled frequency 
 freq_max = 9500                 # Spectrogram strip's maximum sampled frequency 
@@ -36,7 +39,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument("wave_file_path", help="process this file from audio to spectrograms")
 parser.add_argument("-o", "--output", help="choose a location for image outputs") # Output directory 
 parser.add_argument("-ch", "--channel", help="select an audio channel to transform") #Channel 
-parser.add_argument("-ds", "--down_sample", help="down sample by a factor of <user input>") # TODO: ensure 1 and above
 args = parser.parse_args() 
 
 # Use arguement values if they exist
@@ -55,17 +57,7 @@ except ValueError:
     print("Invalid input file type. Supported file type(s): .wav")
     sys.exit(1)
 
-print(f"native sample rate = {sample_rate}")
-desired_sample_rate = sample_rate / down_sample_ratio
-
-# If user wants down sampling, change desired sample rate here TODO: does nothing yet
-if (args.down_sample):
-    down_sample_ratio = float(args.down_sample)
-    desired_sample_rate = int(desired_sample_rate / down_sample_ratio)
-
-# DEBUG 
-print(f"desired sample rate = {desired_sample_rate}")
-
+print(f"Sample rate = {sample_rate}")
 
 # Select a channel if multiple 
 if len(data.shape) > 1:
@@ -75,14 +67,14 @@ if len(data.shape) > 1:
 else:
     print(f"number of channels = 1")
 
-length = data.shape[0] / sample_rate
+length = data.shape[0] / sample_rate    # Original sample rate 
 if not (58 < length < 62): # Make sure length is 60 seconds for now! 
     print(f"Length not ~60 second, undefined behavior... exiting")
     sys.exit(0)
 print(f"length (seconds) = {length}")
 
 # Determine the number of whole 3 second chunks
-samples_per_chunk = int(desired_sample_rate * chunk_duration)
+samples_per_chunk = int(sample_rate * chunk_duration)
 num_chunks = int(len(data) / samples_per_chunk)
 print(f"num chunks = {num_chunks}")
 
@@ -112,7 +104,7 @@ def make_spectro(num_rows=10, which_plot=0):
         window = get_window("hann", fft_size)
 
                                             # 10 spectros to a plot, if 2nd  spectro grab 10 - 19
-        f, t, Sxx = spectrogram(all_chunks[i + which_plot*10], fs=sample_rate, window=window, nperseg=fft_size, scaling='density')
+        f, t, Sxx = spectrogram(all_chunks[i + which_plot*10], fs=sample_rate,  window=window, nperseg=fft_size, scaling='density')
 
         fmin, fmax = freq_min, freq_max
         freq_slice = np.where((f >= fmin) & (f <= fmax))
