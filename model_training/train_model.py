@@ -26,8 +26,6 @@ parser.add_argument("yamlpath", help="Path to the dataset.yaml file is or will b
 args = parser.parse_args()
 
 yaml_path = args.yamlpath                       # In this format: </home/gpu_enjoyer/datasets/FKW_OD_Spectrograms/formatted_dataset/dataset.yaml>
-# base_path = os.path.dirname(yaml_path)        # Remove 'dataset.yaml' from path 
-
 
 model = YOLO('yolo11n.pt')
 
