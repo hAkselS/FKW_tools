@@ -4,13 +4,13 @@ File:   train_od_model.py
 Spec:   Once data is properly formatted, train_model can be used
         to apply transfer learning to a YOLO object dection model.
 
-Usage:  python3 train_od_model.py <path/to/dataset.yaml> 
+Usage:  python3 model_training/train_model.py <path/to/dataset.yaml> 
  
 '''
 
 from ultralytics import YOLO 
 import argparse
-import os
+#import os
 
 
 ###################################################################
