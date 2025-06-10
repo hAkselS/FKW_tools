@@ -28,4 +28,4 @@ input_csv = 'input.csv'
 output_csv = 'output.csv'
 column_to_filter = 2 # Example: filter the 3rd column (index 2)
 values = ['value1', 'value2'] # Example values to keep in the column
-filter_csv(input_csv, output_csv, column_to_filter, values)
+filter_csv(input_csv, output_csv, column_to_filter, values)k
