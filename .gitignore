@@ -1,6 +1,7 @@
 __pycache__/
 scratch_materials
 images 
+annotations
 audio_chunks 
 models
 runs

@@ -25,7 +25,8 @@ import os
 # CONFIGURATION DEFAULTS
 desired_species = 33 # False Killer Whale (not used currently)
 cruise_numbers = [1705, 1706] # Lasker, Sette (not used currently)
-file_and_datatime = [] # TODO: consider inserting this into a pd dataframe 
+file_and_datatime = [] # A list of spectrogram names versus their respective start time
+matched_PAM_annotations = [] # A list of annotations who's time intersect with existing spectrograms
 ###################################################################
 
 # Accept command line args
@@ -61,7 +62,10 @@ def file_name_to_time(file_name):
 
 # Get datetimes from existing spectrograms
 def find_spectro_times(path_to_spectros):
-    ''''tbd'''
+    ''''
+    This function looks at the directory where spectrograms are stored
+    and saves a list of spectrogram names versus the times which they represent.
+    '''
     file_names = os.listdir(path_to_spectros)
     file_names = [f for f in file_names if os.path.isfile(os.path.join(path_to_spectros,f))]
 
@@ -70,22 +74,22 @@ def find_spectro_times(path_to_spectros):
         entry = [i, time]
         file_and_datatime.append(entry)
 
-# Get annotations
+# Get annotations from PAMGuard csv output 
 def load_original_annotations(path_to_annotations):
+
     # Load CSV using pandas
     df = pd.read_csv(path_to_annotations)
 
     # DEBUG
-    print(df['UTC'].head(10).tolist())
+    print('\n')
+    print("Hewwo")
+    #print(df['UTC'].head(2).tolist())
+    print('\n')
+
 
     # Parse UTC column to datetime
     df['UTC'] = pd.to_datetime(df['UTC'], format='mixed') # Potential bug here, some strings do not have the fractional element # format='%Y-%m-%d %H:%M:%S.%f'
-    print(df['UTC'].head(10).tolist())
-
-
-    # Store matching annotations here
-    matched_annotations = [] # TODO: remain and maybe rescope 
-
+    #print(df['UTC'].head(2).tolist())
     # Loop through each row in the CSV
     for _, row in df.iterrows():
         annotation_time = row['UTC']
@@ -95,20 +99,54 @@ def load_original_annotations(path_to_annotations):
         
             if 0 <= time_diff <= 30:
                     # Match found — store selected fields
-                    matched_annotations.append({
+                    matched_PAM_annotations.append({
                         'spectro_file': fname,
                         'UTC': annotation_time,
                         'duration': row['duration'],
                         'freqBeg': row['freqBeg'],
-                        'freqEnd': row['freqEnd']
+                        'freqEnd': row['freqEnd'],
+                        'species': row['species']
                     })
                     break  # Found a match, no need to keep checking other spectros
 
-    return matched_annotations
+    # print(matched_PAM_annotations)
+    return matched_PAM_annotations
 
+
+def export_annotations(matched_PAM_annotations): 
+    '''
+    Turn each annotation into a text file in YOLO OBB format. 
+    '''
+    if not os.path.exists('annotations'):
+        print("annotations directory does not exist, please create an 'annotations' directory in your project root.")
+        return
+    
+    for i in range(10): # TODO: should be range of list # range(len(matched_PAM_annotations)): 
+        text_file_name = 'annotations/bob_' + str(i)
+        try:
+            with open(text_file_name, 'w') as file: 
+                class_index = matched_PAM_annotations[i]['species']
+                if class_index == 33:
+                    '''Re-assign species to 'whistle' to match existing annotations'''
+                    class_index = 'whistle'
+
+                # TODO: THESE VALUES ARE NOT FINAL, NEED TO TRANSLATE TO NORMALIZED SPECTRO FORMAT
+                start_time = matched_PAM_annotations[i]['UTC']
+                end_time = matched_PAM_annotations[i]['duration']
+                freq_low = matched_PAM_annotations[i]['freqBeg']
+                freq_high = matched_PAM_annotations[i]['freqEnd']
+                FILE_NAME = matched_PAM_annotations[i]['spectro_file']
+                line = f"File name = # {FILE_NAME} # | {class_index} {start_time} {end_time} {freq_low} {freq_high}\n"
+                # END TODO 
+                file.write(line) 
+        except FileNotFoundError:
+            print("annotations directory does not exist, please create an 'annotations' directory in your project root.")
+            return
+    
+    print('finished dakine')
 
 find_spectro_times(spectrogram_folder)
 
-print(file_and_datatime)
+load_original_annotations(csv_filepath)
 
-load_original_annotations(args.csv_filepath)
+export_annotations(matched_PAM_annotations)
