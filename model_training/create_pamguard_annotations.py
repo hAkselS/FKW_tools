@@ -19,7 +19,7 @@ import pandas as pd
 import argparse
 from datetime import datetime, timedelta
 import os
-
+import sys
 
 ###################################################################
 # CONFIGURATION DEFAULTS
@@ -76,16 +76,15 @@ def find_spectro_times(path_to_spectros):
 
 # Get annotations from PAMGuard csv output 
 def load_original_annotations(path_to_annotations):
+    '''
+    This function compares times of existing spectrograms with annotation times.
+    If an annotation time is within 30 seconds of a sepctrogram's time, key information
+    about the annotation is appended to the matched_PAM_annotations list. 
+    '''
 
+    # TODO: throw an error if no spectrograms match with csv file annotations! 
     # Load CSV using pandas
     df = pd.read_csv(path_to_annotations)
-
-    # DEBUG
-    print('\n')
-    print("Hewwo")
-    #print(df['UTC'].head(2).tolist())
-    print('\n')
-
 
     # Parse UTC column to datetime
     df['UTC'] = pd.to_datetime(df['UTC'], format='mixed') # Potential bug here, some strings do not have the fractional element # format='%Y-%m-%d %H:%M:%S.%f'
@@ -109,7 +108,10 @@ def load_original_annotations(path_to_annotations):
                     })
                     break  # Found a match, no need to keep checking other spectros
 
-    # print(matched_PAM_annotations)
+    if(len(matched_PAM_annotations) == 0):
+        print("None of the provided spectrograms match with the provided annotations... Exiting")
+        sys.exit(1)
+    
     return matched_PAM_annotations
 
 
@@ -144,6 +146,8 @@ def export_annotations(matched_PAM_annotations):
             return
     
     print('finished dakine')
+
+print("Creating YOLO OBB annotations from PAMGuard annotations. :)\n")
 
 find_spectro_times(spectrogram_folder)
 
