@@ -27,6 +27,23 @@ desired_species = 33 # False Killer Whale (not used currently)
 cruise_numbers = [1705, 1706] # Lasker, Sette (not used currently)
 file_and_datatime = [] # A list of spectrogram names versus their respective start time
 matched_PAM_annotations = [] # A list of annotations who's time intersect with existing spectrograms
+frequency_range = 5000 # The difference between the minimum and maximum frequencies shown in the spectrograms
+normalized_strip_height = 0.08394736909 # The vertical heigh of each strip (how thicc it is)
+normalized_stripe_ys = {
+    "y1": 0.00000000000000000,
+    "y2": 0.10163253864469451,
+    "y3": 0.20314887407501037,
+    "y4": 0.3059226305752359,
+    "y5": 0.4067793229338596,
+    "y6": 0.5089243688991303,
+    "y7": 0.6102942321889212,
+    "y8": 0.712957875364088,
+    "y9": 0.8144914649867669,
+    "y10": 0.9160526309037224
+
+} # Each number represents the normalized top of each strip
+norm_over_freq = normalized_strip_height / frequency_range # used to translate between a change in frequency to a change in norm
+
 ###################################################################
 
 # Accept command line args
@@ -40,6 +57,7 @@ spectrogram_folder = args.spectrogram_folder
 csv_filepath = args.csv_filepath
 
 ## HELPER FUNCTIONS 
+
 # Translate JPG file names to python datetimes 
 def file_name_to_time(file_name):
     '''tbd'''
@@ -114,6 +132,17 @@ def load_original_annotations(path_to_annotations):
     
     return matched_PAM_annotations
 
+# Determine bounding box normalized y values
+def find_box_ys(strip_number, multi_strip=False):
+    '''Receive a strip number (from another function) then use the frequency
+    min and max to find the normalized min and max. Note: y=0.0 is the TOP of the image.
+    y1 (the first strip) starts at 0.0 and grows down! Frequency is translate as the difference between 
+    the 9k (the top of the strip) and target value.'''
+    # Check for valid strip number (between 1 and 10)
+    if not 1<=strip_number <= 10: 
+        print("Invalid strip number! There are 10 strips number from 1 to 10... Existing")
+        sys.exit(1) 
+    
 
 def export_annotations(matched_PAM_annotations): 
     '''
