@@ -12,6 +12,7 @@ I/O:    This program expects a CSV with the following category names:
         via exporting cruise data from R. 
 
 Note:   The last three digits is the AC number. Ex: 1705109 is LaskerAC109
+
 Usage:  python3 model_training/create_pamguard_annotations.py <folder/with/spectrograms> <path/to/csv>
 '''
 
@@ -28,21 +29,22 @@ cruise_numbers = [1705, 1706] # Lasker, Sette (not used currently)
 file_and_datatime = [] # A list of spectrogram names versus their respective start time
 matched_PAM_annotations = [] # A list of annotations who's time intersect with existing spectrograms
 frequency_range = 5000 # The difference between the minimum and maximum frequencies shown in the spectrograms
+top_of_spectrogram_freq = 9000 # The frequency at the very top of the spectrogram strip 
 normalized_strip_height = 0.08394736909 # The vertical heigh of each strip (how thicc it is)
 normalized_stripe_ys = {
-    "y1": 0.00000000000000000,
-    "y2": 0.10163253864469451,
-    "y3": 0.20314887407501037,
-    "y4": 0.3059226305752359,
-    "y5": 0.4067793229338596,
-    "y6": 0.5089243688991303,
-    "y7": 0.6102942321889212,
-    "y8": 0.712957875364088,
-    "y9": 0.8144914649867669,
-    "y10": 0.9160526309037224
+    "y0": 0.00000000000000000,
+    "y1": 0.10163253864469451,
+    "y2": 0.20314887407501037,
+    "y3": 0.3059226305752359,
+    "y4": 0.4067793229338596,
+    "y5": 0.5089243688991303,
+    "y6": 0.6102942321889212,
+    "y7": 0.712957875364088,
+    "y8": 0.8144914649867669,
+    "y9": 0.9160526309037224
 
 } # Each number represents the normalized top of each strip
-norm_over_freq = normalized_strip_height / frequency_range # used to translate between a change in frequency to a change in norm
+freq_to_norm_conversion_factor = normalized_strip_height / frequency_range # used to translate between a change in frequency to a change in norm
 
 ###################################################################
 
@@ -133,15 +135,20 @@ def load_original_annotations(path_to_annotations):
     return matched_PAM_annotations
 
 # Determine bounding box normalized y values
-def find_box_ys(strip_number, multi_strip=False):
+def find_box_ys(freqHigh, freqLow, strip_number): # 
     '''Receive a strip number (from another function) then use the frequency
     min and max to find the normalized min and max. Note: y=0.0 is the TOP of the image.
-    y1 (the first strip) starts at 0.0 and grows down! Frequency is translate as the difference between 
+    y0 (the first strip) starts at 0.0 and grows down! Frequency is translate as the difference between 
     the 9k (the top of the strip) and target value.'''
     # Check for valid strip number (between 1 and 10)
-    if not 1<=strip_number <= 10: 
-        print("Invalid strip number! There are 10 strips number from 1 to 10... Existing")
+    if not 0<=strip_number <= 9: 
+        print("Invalid strip number! There are 10 strips number from 0 to 9... Existing")
         sys.exit(1) 
+    
+    norm_high = ((top_of_spectrogram_freq - freqHigh) * freq_to_norm_conversion_factor) + list(normalized_stripe_ys.values())[strip_number]
+    norm_low = ((top_of_spectrogram_freq - freqLow) * freq_to_norm_conversion_factor) + list(normalized_stripe_ys.values())[strip_number]
+
+    return norm_high, norm_low
     
 
 def export_annotations(matched_PAM_annotations): 
@@ -161,14 +168,24 @@ def export_annotations(matched_PAM_annotations):
                     '''Re-assign species to 'whistle' to match existing annotations'''
                     class_index = 'whistle'
 
-                # TODO: THESE VALUES ARE NOT FINAL, NEED TO TRANSLATE TO NORMALIZED SPECTRO FORMAT
+                # Raw values
                 start_time = matched_PAM_annotations[i]['UTC']
                 end_time = matched_PAM_annotations[i]['duration']
-                freq_low = matched_PAM_annotations[i]['freqBeg']
                 freq_high = matched_PAM_annotations[i]['freqEnd']
+                freq_low = matched_PAM_annotations[i]['freqBeg']
                 FILE_NAME = matched_PAM_annotations[i]['spectro_file']
-                line = f"File name = # {FILE_NAME} # | {class_index} {start_time} {end_time} {freq_low} {freq_high}\n"
-                # END TODO 
+
+                # PLAN: 
+                # Determine if a signal passes over multiple strips, then call find box Ys twice with different strip numbers
+                
+                # temp: get the norm high and low without the times (all in the first row)
+                norm_high, norm_low = find_box_ys(freq_high, freq_low, 0)
+
+
+                # TODO: incoporate multiple lines in the case that there are more than one annotations per bbox
+                line = f"File name = # {FILE_NAME} # | {class_index} {start_time} {end_time} | {norm_high} {norm_low}\n"
+                
+
                 file.write(line) 
         except FileNotFoundError:
             print("annotations directory does not exist, please create an 'annotations' directory in your project root.")
