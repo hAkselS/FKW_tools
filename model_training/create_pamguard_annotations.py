@@ -45,7 +45,7 @@ normalized_stripe_ys = {
 
 } # Each number represents the normalized top of each strip
 freq_to_norm_conversion_factor = normalized_strip_height / frequency_range # used to translate between a change in frequency to a change in norm
-
+time_to_norm_conversion_factor = 1 / 3 # the full screen is 1 unit and represents 3 seconds of time
 ###################################################################
 
 # Accept command line args
@@ -62,7 +62,7 @@ csv_filepath = args.csv_filepath
 
 # Translate JPG file names to python datetimes 
 def file_name_to_time(file_name):
-    '''tbd'''
+    '''tbd''' # TODO: fill in spec
     # Remove prefix and suffix
     base = file_name.split('-')[0]  # '1706_20170709_034442_942'
     parts = base.split('_')  # ['1706', '20170709', '034442', '942']
@@ -120,6 +120,7 @@ def load_original_annotations(path_to_annotations):
                     # Match found — store selected fields
                     matched_PAM_annotations.append({
                         'spectro_file': fname,
+                        'file_time': spectro_time,
                         'UTC': annotation_time,
                         'duration': row['duration'],
                         'freqBeg': row['freqBeg'],
@@ -134,8 +135,19 @@ def load_original_annotations(path_to_annotations):
     
     return matched_PAM_annotations
 
+# Determine bounding box normalized x values and return strip numbers 
+def find_box_xs(spectrogram_start_time, bbox_start_time, bbox_duration): 
+    '''Find the difference between the spectrogram start time and bbox start time
+    to determine the strip that the bbox starts in. Normalize the duration to return coordinates
+    and also determine if the annotation occurs on multiple strips.
+    '''
+    time_diff = (bbox_start_time - spectrogram_start_time).total_seconds()
+    print(f"time dif = [{time_diff}]")
+    print(f"type time diff = {type(time_diff)}")
+    return None
+
 # Determine bounding box normalized y values
-def find_box_ys(freqHigh, freqLow, strip_number): # 
+def find_box_ys(freqHigh, freqLow, strip_number): 
     '''Receive a strip number (from another function) then use the frequency
     min and max to find the normalized min and max. Note: y=0.0 is the TOP of the image.
     y0 (the first strip) starts at 0.0 and grows down! Frequency is translate as the difference between 
@@ -169,15 +181,17 @@ def export_annotations(matched_PAM_annotations):
                 if class_index == 33:
                     class_index = 'whistle'
 
-                start_time = ann['UTC']
-                end_time = ann['duration']
+                bbox_start_time = ann['UTC']
+                bbox_duration = ann['duration']
                 freq_high = ann['freqEnd']
                 freq_low = ann['freqBeg']
                 FILE_NAME = ann['spectro_file']
-
+                file_start_time = ann['file_time']
+                
+                find_box_xs(file_start_time, bbox_start_time, bbox_duration)
                 norm_high, norm_low = find_box_ys(freq_high, freq_low, 0)
 
-                line = f"File name = {FILE_NAME} | {class_index} | {start_time} {end_time} | {norm_high} {norm_low}\n"
+                line = f"File name = {FILE_NAME} | {class_index} | file_time {file_start_time} | {bbox_start_time} {bbox_duration} | {norm_high} {norm_low}\n"
                 file.write(line)
         except FileNotFoundError:
             print("annotations directory does not exist, please create an 'annotations' directory in your project root.")
