@@ -126,7 +126,7 @@ def load_original_annotations(path_to_annotations):
                         'freqEnd': row['freqEnd'],
                         'species': row['species']
                     })
-                    break  # Found a match, no need to keep checking other spectros
+                    #  break  # Found a match, no need to keep checking other spectros (removed, i want to find multiple matches)
 
     if(len(matched_PAM_annotations) == 0):
         print("None of the provided spectrograms match with the provided annotations... Exiting")
@@ -159,39 +159,32 @@ def export_annotations(matched_PAM_annotations):
         print("annotations directory does not exist, please create an 'annotations' directory in your project root.")
         return
     
-    for i in range(10): # TODO: should be range of list # range(len(matched_PAM_annotations)): 
-        text_file_name = 'annotations/bob_' + str(i)
+    for ann in matched_PAM_annotations[:10]:
+        # Create file name based on associated .jpg file
+        base_name = os.path.splitext(ann['spectro_file'])[0]
+        text_file_name = f'annotations/{base_name}.txt'
         try:
-            with open(text_file_name, 'w') as file: 
-                class_index = matched_PAM_annotations[i]['species']
+            with open(text_file_name, 'a') as file:  # open in append mode
+                class_index = ann['species']
                 if class_index == 33:
-                    '''Re-assign species to 'whistle' to match existing annotations'''
                     class_index = 'whistle'
 
-                # Raw values
-                start_time = matched_PAM_annotations[i]['UTC']
-                end_time = matched_PAM_annotations[i]['duration']
-                freq_high = matched_PAM_annotations[i]['freqEnd']
-                freq_low = matched_PAM_annotations[i]['freqBeg']
-                FILE_NAME = matched_PAM_annotations[i]['spectro_file']
+                start_time = ann['UTC']
+                end_time = ann['duration']
+                freq_high = ann['freqEnd']
+                freq_low = ann['freqBeg']
+                FILE_NAME = ann['spectro_file']
 
-                # PLAN: 
-                # Determine if a signal passes over multiple strips, then call find box Ys twice with different strip numbers
-                
-                # temp: get the norm high and low without the times (all in the first row)
                 norm_high, norm_low = find_box_ys(freq_high, freq_low, 0)
 
-
-                # TODO: incoporate multiple lines in the case that there are more than one annotations per bbox
-                line = f"File name = # {FILE_NAME} # | {class_index} {start_time} {end_time} | {norm_high} {norm_low}\n"
-                
-
-                file.write(line) 
+                line = f"File name = {FILE_NAME} | {class_index} | {start_time} {end_time} | {norm_high} {norm_low}\n"
+                file.write(line)
         except FileNotFoundError:
             print("annotations directory does not exist, please create an 'annotations' directory in your project root.")
             return
-    
+
     print('finished dakine')
+
 
 print("Creating YOLO OBB annotations from PAMGuard annotations. :)\n")
 
