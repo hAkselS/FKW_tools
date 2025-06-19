@@ -141,10 +141,22 @@ def find_box_xs(spectrogram_start_time, bbox_start_time, bbox_duration):
     to determine the strip that the bbox starts in. Normalize the duration to return coordinates
     and also determine if the annotation occurs on multiple strips.
     '''
+    left_over = 0 
+
     time_diff = (bbox_start_time - spectrogram_start_time).total_seconds()
-    print(f"time dif = [{time_diff}]")
-    print(f"type time diff = {type(time_diff)}")
-    return None
+
+    # Each strip is 3 seconds, find the remainder (modulo) then convert to normalized coordinates
+    norm_start = (time_diff % 3) * time_to_norm_conversion_factor
+    # Normalize the duration then add to the normalized start time
+    norm_stop = norm_start + (bbox_duration * time_to_norm_conversion_factor) 
+    if norm_stop > 1: # In the case the the bbox extends beyond one strip
+        left_over = norm_stop - 1 # How much of the bounding box continues onto the next row (normalized)
+        norm_stop = 1
+
+    # Determine what row the annotations lives in
+    row_number = int(time_diff // 3) # 3 seconds per strip (0 - 9)
+    
+    return row_number, norm_start, norm_stop, left_over
 
 # Determine bounding box normalized y values
 def find_box_ys(freqHigh, freqLow, strip_number): 
@@ -188,10 +200,10 @@ def export_annotations(matched_PAM_annotations):
                 FILE_NAME = ann['spectro_file']
                 file_start_time = ann['file_time']
                 
-                find_box_xs(file_start_time, bbox_start_time, bbox_duration)
-                norm_high, norm_low = find_box_ys(freq_high, freq_low, 0)
+                row_number, norm_start, norm_stop, left_over = find_box_xs(file_start_time, bbox_start_time, bbox_duration)
+                norm_high, norm_low = find_box_ys(freq_high, freq_low, row_number)
 
-                line = f"File name = {FILE_NAME} | {class_index} | file_time {file_start_time} | {bbox_start_time} {bbox_duration} | {norm_high} {norm_low}\n"
+                line = f"File name = {FILE_NAME} {class_index} {norm_start} {norm_high} {norm_stop} {norm_high} {norm_start} {norm_low} {norm_stop} {norm_low}\n"
                 file.write(line)
         except FileNotFoundError:
             print("annotations directory does not exist, please create an 'annotations' directory in your project root.")
