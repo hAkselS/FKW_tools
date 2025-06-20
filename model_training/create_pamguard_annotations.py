@@ -102,13 +102,11 @@ def load_original_annotations(path_to_annotations):
     about the annotation is appended to the matched_PAM_annotations list. 
     '''
 
-    # TODO: throw an error if no spectrograms match with csv file annotations! 
     # Load CSV using pandas
     df = pd.read_csv(path_to_annotations)
 
     # Parse UTC column to datetime
     df['UTC'] = pd.to_datetime(df['UTC'], format='mixed') # Potential bug here, some strings do not have the fractional element # format='%Y-%m-%d %H:%M:%S.%f'
-    #print(df['UTC'].head(2).tolist())
     # Loop through each row in the CSV
     for _, row in df.iterrows():
         annotation_time = row['UTC']
@@ -183,7 +181,7 @@ def export_annotations(matched_PAM_annotations):
         print("annotations directory does not exist, please create an 'annotations' directory in your project root.")
         return
     
-    for ann in matched_PAM_annotations[:10]:
+    for ann in matched_PAM_annotations: # [:10] (if testing only the first ten)
         # Create file name based on associated .jpg file
         base_name = os.path.splitext(ann['spectro_file'])[0]
         text_file_name = f'annotations/{base_name}.txt'
@@ -191,19 +189,19 @@ def export_annotations(matched_PAM_annotations):
             with open(text_file_name, 'a') as file:  # open in append mode
                 class_index = ann['species']
                 if class_index == 33:
-                    class_index = 'whistle'
+                    class_index = '0'
 
                 bbox_start_time = ann['UTC']
                 bbox_duration = ann['duration']
                 freq_high = ann['freqEnd']
                 freq_low = ann['freqBeg']
-                FILE_NAME = ann['spectro_file']
+                # FILE_NAME = ann['spectro_file'] # Stored for reference if needed
                 file_start_time = ann['file_time']
                 
                 row_number, norm_start, norm_stop, left_over = find_box_xs(file_start_time, bbox_start_time, bbox_duration)
                 norm_high, norm_low = find_box_ys(freq_high, freq_low, row_number)
 
-                line = f"File name = {FILE_NAME} {class_index} {norm_start} {norm_high} {norm_stop} {norm_high} {norm_start} {norm_low} {norm_stop} {norm_low}\n"
+                line = f"{class_index} {norm_start} {norm_high} {norm_stop} {norm_high} {norm_start} {norm_low} {norm_stop} {norm_low}\n"
                 file.write(line)
         except FileNotFoundError:
             print("annotations directory does not exist, please create an 'annotations' directory in your project root.")
