@@ -121,8 +121,8 @@ def load_original_annotations(path_to_annotations):
                         'file_time': spectro_time,
                         'UTC': annotation_time,
                         'duration': row['duration'],
-                        'freqBeg': row['freqBeg'],
-                        'freqEnd': row['freqEnd'],
+                        'freqMin': row['freqMin'],
+                        'freqMax': row['freqMax'],
                         'species': row['species']
                     })
                     #  break  # Found a match, no need to keep checking other spectros (removed, i want to find multiple matches)
@@ -144,7 +144,7 @@ def find_box_xs(spectrogram_start_time, bbox_start_time, bbox_duration):
     time_diff = (bbox_start_time - spectrogram_start_time).total_seconds()
 
     # Each strip is 3 seconds, find the remainder (modulo) then convert to normalized coordinates
-    norm_start = (time_diff % 3) * time_to_norm_conversion_factor
+    norm_start = ((time_diff % 3) - 1)* time_to_norm_conversion_factor # TODO: -1 IS ADDED BECAUSE I'M VISUALLY SEEING ANNOTATIONS ARE OFF TO THE RIGHT ON THE ACTUAL LOCATIONS
     # Normalize the duration then add to the normalized start time
     norm_stop = norm_start + (bbox_duration * time_to_norm_conversion_factor) 
     if norm_stop > 1: # In the case the the bbox extends beyond one strip
@@ -191,17 +191,33 @@ def export_annotations(matched_PAM_annotations):
                 if class_index == 33:
                     class_index = '0'
 
-                bbox_start_time = ann['UTC']
+                bbox_start_time = ann['UTC'] 
                 bbox_duration = ann['duration']
-                freq_high = ann['freqEnd']
-                freq_low = ann['freqBeg']
+                freq_high = ann['freqMax']
+                freq_low = ann['freqMin']
                 # FILE_NAME = ann['spectro_file'] # Stored for reference if needed
                 file_start_time = ann['file_time']
                 
                 row_number, norm_start, norm_stop, left_over = find_box_xs(file_start_time, bbox_start_time, bbox_duration)
                 norm_high, norm_low = find_box_ys(freq_high, freq_low, row_number)
 
-                line = f"{class_index} {norm_start} {norm_high} {norm_stop} {norm_high} {norm_start} {norm_low} {norm_stop} {norm_low}\n"
+                # Using the x1,y1 x2,y2 x3,y3 x 4,y4 format
+                # line = f"{class_index} {norm_start} {norm_high} {norm_stop} {norm_high} {norm_start} {norm_low} {norm_stop} {norm_low}\n"
+                
+                # Using the x y width height format 
+                width = norm_stop - norm_start
+                height = norm_low - norm_high # y=0 is the TOP of the figure 
+                middle_point_x = norm_start + (width/2)
+                middle_point_y = norm_high + (height/2)
+                
+                line = f"{class_index} {middle_point_x} {middle_point_y} {width} {height}\n"
+
+
+                # Debug 
+                # line = f"norm_stop [{norm_stop}, norm_start [{norm_start}], width [{width}]\n"
+                # line = f"norm low [{norm_low}], norm high [{norm_high}], height [{height} | UTC = [{bbox_start_time}]\n]"
+                
+
                 file.write(line)
         except FileNotFoundError:
             print("annotations directory does not exist, please create an 'annotations' directory in your project root.")
