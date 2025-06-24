@@ -31,3 +31,5 @@ model = YOLO('yolo11n.pt')
 
 # The dataset.yaml lives with the dataset
 results = model.train(data=yaml_path, epochs=100, imgsz=640)
+
+# TODO: add number of epochs as an arg 

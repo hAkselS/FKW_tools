@@ -54,6 +54,8 @@ parser.add_argument("spectrogram_folder", help="this folder should contain the s
 parser.add_argument("csv_filepath", help="this csv file should contain vocalization localizations.")
 args = parser.parse_args()
 
+# TODO: add a function to choose output location 
+
 # Turn args into variables (style points)
 spectrogram_folder = args.spectrogram_folder 
 csv_filepath = args.csv_filepath
