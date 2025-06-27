@@ -3,7 +3,7 @@ scratch_materials
 images 
 annotations
 audio_chunks 
-models
+models/old_models
 runs
 yolo11n.pt 
 .DS_Store
