@@ -10,8 +10,6 @@ Usage:  python3 model_training/train_model.py <path/to/dataset.yaml>
 
 from ultralytics import YOLO 
 import argparse
-#import os
-
 
 ###################################################################
 # CONFIGURATION DEFAULTS

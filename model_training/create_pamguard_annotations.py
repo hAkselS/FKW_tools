@@ -3,8 +3,8 @@ File:   create_pamguard_annotatoins.py
 
 Spec:   This program looks at the spectrograms you have already made and assigns each one a datetime range.
         This program then looks at existing pamguard annotations and determines if
-        the annotation falls within a time range of an existing spectrogram. If an annotation falls
-        within the time range of a spectrogram, a new annotation is created and saved as a text file. 
+        any PAMGuard annotations fall within a time range of an existing spectrogram. If an annotation falls
+        within the time range of a spectrogram, a new annotation (compatible with the FKW_tool spectrogram format) is created and saved as a text file. 
 
 I/O:    This program expects a CSV with the following category names: 
             "","UID","UTC","freqBeg","freqEnd","freqMean","freqStdDev","duration","freqSlopeMean","freqAbsSlopeMean","freqPosSlopeMean","freqNegSlopeMean","freqSlopeRatio","freqStepUp","freqStepDown","numSweepsDwnFlat","numSweepsDwnUp","numSweepsFlatDwn","numSweepsFlatUp","numSweepsUpDwn","numSweepsUpFlat","numInflections","freqCofm","freqQuarter1","freqQuarter2","freqQuarter3","freqSpread","freqMin","freqMax","freqRange","freqMedian","freqCenter","freqRelBw","freqMaxMinRatio","freqBegEndRatio","freqNumSteps","stepDur","freqBegSweep","freqBegUp","freqBegDwn","freqEndSweep","freqEndUp","freqEndDwn","freqSweepUpPercent","freqSweepDwnPercent","freqSweepFlatPercent","inflMaxDelta","inflMinDelta","inflMaxMinDelta","inflMeanDelta","inflStdDevDelta","inflMedianDelta","inflDur","BinaryFile","eventId","detectorName","db","species"
@@ -64,7 +64,6 @@ csv_filepath = args.csv_filepath
 
 # Translate JPG file names to python datetimes 
 def file_name_to_time(file_name):
-    '''tbd''' # TODO: fill in spec
     # Remove prefix and suffix
     base = file_name.split('-')[0]  # '1706_20170709_034442_942'
     parts = base.split('_')  # ['1706', '20170709', '034442', '942']
@@ -174,7 +173,6 @@ def find_box_ys(freqHigh, freqLow, strip_number):
 
     return norm_high, norm_low
     
-
 def export_annotations(matched_PAM_annotations): 
     '''
     Turn each annotation into a text file in YOLO OBB format. 
@@ -213,12 +211,6 @@ def export_annotations(matched_PAM_annotations):
                 middle_point_y = norm_high + (height/2)
                 
                 line = f"{class_index} {middle_point_x} {middle_point_y} {width} {height}\n"
-
-
-                # Debug 
-                # line = f"norm_stop [{norm_stop}, norm_start [{norm_start}], width [{width}]\n"
-                # line = f"norm low [{norm_low}], norm high [{norm_high}], height [{height} | UTC = [{bbox_start_time}]\n]"
-                
 
                 file.write(line)
         except FileNotFoundError:
