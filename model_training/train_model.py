@@ -4,14 +4,12 @@ File:   train_od_model.py
 Spec:   Once data is properly formatted, train_model can be used
         to apply transfer learning to a YOLO object dection model.
 
-Usage:  python3 train_od_model.py <path/to/dataset.yaml> 
+Usage:  python3 model_training/train_model.py <path/to/dataset.yaml> 
  
 '''
 
 from ultralytics import YOLO 
 import argparse
-import os
-
 
 ###################################################################
 # CONFIGURATION DEFAULTS
@@ -26,10 +24,10 @@ parser.add_argument("yamlpath", help="Path to the dataset.yaml file is or will b
 args = parser.parse_args()
 
 yaml_path = args.yamlpath                       # In this format: </home/gpu_enjoyer/datasets/FKW_OD_Spectrograms/formatted_dataset/dataset.yaml>
-# base_path = os.path.dirname(yaml_path)        # Remove 'dataset.yaml' from path 
-
 
 model = YOLO('yolo11n.pt')
 
 # The dataset.yaml lives with the dataset
 results = model.train(data=yaml_path, epochs=100, imgsz=640)
+
+# TODO: add number of epochs as an arg 

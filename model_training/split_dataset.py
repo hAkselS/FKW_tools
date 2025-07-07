@@ -2,15 +2,14 @@
 File:   split_od_data.py
 
 Spec:   Split object detection data according to YOLO spec. See: https://docs.ultralytics.com/datasets/detect/#ultralytics-yolo-format
-        Remember to export data from label studio in the YOLO OBB format. 
+        Remember to export data from label studio (or other annotation software) in the YOLO OBB format. 
         
-Usage:  python3 split_od_data.py <path/to/labels> <path/to/images> -o <output/directory> 
+Usage:  python3 model_training/split_dataset.py <path/to/labels> <path/to/images> -o <output/directory> 
 
 '''
 
 import os 
 import argparse
-import pandas
 import shutil
 import sys
 
