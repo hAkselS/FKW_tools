@@ -27,6 +27,7 @@ parser.add_argument("input_directory", help="process audio in this directory")
 parser.add_argument("-o", "--output", help="choose a location for image outputs") # output directory 
 parser.add_argument("-c","--count", type=int, default = 1, 
                     help="count specifies the number of audio files to analyze")
+parser.add_argument("--no_logs", action="store_true", help="ignore existing analyst logs and do not write new logs.")
 args = parser.parse_args() # TODO: Allow channel and down sampling as args
 
 if not (args.output):
@@ -44,7 +45,7 @@ for  file in sorted(os.listdir(args.input_directory)):
     filename = os.path.join(args.input_directory, file)
 
     if os.path.isfile(filename):
-        if (i > args.count): 
+        if (i >= args.count): 
             print(f"Max file analysis count [{args.count}] reached, exiting...")
             sys.exit(0)
 
@@ -54,16 +55,19 @@ for  file in sorted(os.listdir(args.input_directory)):
             spectrogram_logs.seek(0) # Move cursor to the start of the existing data
             reader = csv.reader(spectrogram_logs)
 
-            # Check to see if file has already been analyzed
-            if any(row == [filename] for row in reader):
-                print(f"Already analyzed [{filename}]")
-                continue 
+            # Check to see if file has already been analyzed (unless no_logs argument is present)
+            if not args.no_logs:
+                if any(row == [filename] for row in reader):
+                    print(f"Already analyzed [{filename}]")
+                    continue 
             
             # Add filename if it has not yet been analyzed 
             else: 
-                writer = csv.writer(spectrogram_logs)
-                writer.writerow([filename])
-                print(f"Logged [{filename}] as analyzed")
+                if not args.no_logs: 
+                    '''Write in the logs if the no_logs argument is not present'''
+                    writer = csv.writer(spectrogram_logs)
+                    writer.writerow([filename])
+                    print(f"Logged [{filename}] as analyzed")
                 i = i + 1 # Only increment i if you have analyzed a file
                 # TODO: print analyzing x/count
 
