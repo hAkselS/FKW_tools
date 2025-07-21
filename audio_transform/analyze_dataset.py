@@ -5,7 +5,7 @@ Spec:   This program looks into a directory and analyzes all of, or a subset
         of, wave files in said directory by calling audio_to_spectro.py
         via command line args. This program writes to <analyst_logs.csv>, a csv that indicates
         what files have been previously analyzed and checks to avoid 
-        double analyzing the same file. 
+        double analyzing the same file. FOR USE ON LAND ONLY.
 
 Usage: python3 audio_transform/analyze_dataset.py <dataset/path> -o <output/directory> -c <number of wave files to analyze> 
 '''
@@ -19,7 +19,7 @@ import sys
 
 ###################################################################
 # CONFIGURATION DEFAULTS
-audio_to_spectro_path = "audio_transform/audio_to_spectro.py"       # This program is a wrapped for audio_to_spectro 
+audio_to_spectro_path = "audio_transform/audio_to_spectro.py"       # This program is a wrapper for audio_to_spectro 
 count = 1                                                           # Default number of wave files to analyze
 ###################################################################
 parser = argparse.ArgumentParser()
