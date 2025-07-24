@@ -1,6 +1,8 @@
 # False Killer Whale Tools
 A repository dedicated to transforming audio to spectrograms, 
-data preperation, model training, and dataset inference. 
+data preperation, model training, and dataset inference. This repo
+is designed to be utilized ON LAND, there is another repo 
+designated for use on the SeaGliders. 
 
 ### Each folder has unique functionalities collected
 
