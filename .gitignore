@@ -7,3 +7,4 @@ models/old_models
 runs
 yolo11n.pt 
 .DS_Store
+.vscode/

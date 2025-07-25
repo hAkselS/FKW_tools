@@ -25,7 +25,6 @@ import argparse
 import sys 
 
 
-
 ###################################################################
 # CONFIGURATION DEFAULTS
 output_directory = 'images'
